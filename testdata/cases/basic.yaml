@@ -1,0 +1,53 @@
+cases:
+  - name: tsql_top_n_by_price
+    dialect: tsql
+    query: |
+      SELECT TOP 10 o_orderkey, o_totalprice
+      FROM orders
+      ORDER BY o_totalprice DESC
+    expected: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      ORDER BY o_totalprice DESC
+      LIMIT 10
+  - name: tsql_dateadd
+    dialect: tsql
+    query: |
+      SELECT DATEADD(day, 7, o_orderdate) AS due_date
+      FROM orders
+      WHERE o_orderkey = 1
+    expected: |
+      SELECT DATEADD(day, 7, o_orderdate) AS due_date
+      FROM orders
+      WHERE o_orderkey = 1
+  - name: oracle_rownum_top_n
+    dialect: oracle
+    query: |
+      SELECT o_orderkey, o_totalprice
+      FROM (SELECT o_orderkey, o_totalprice FROM orders ORDER BY o_totalprice DESC)
+      WHERE ROWNUM <= 10
+    expected: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      ORDER BY o_totalprice DESC
+      LIMIT 10
+  - name: oracle_outer_join
+    dialect: oracle
+    query: |
+      SELECT c.c_name, o.o_orderkey
+      FROM customer c, orders o
+      WHERE c.c_custkey = o.o_custkey(+)
+    expected: |
+      SELECT c.c_name, o.o_orderkey
+      FROM customer c
+      LEFT OUTER JOIN orders o ON c.c_custkey = o.o_custkey
+  - name: oracle_nvl
+    dialect: oracle
+    query: |
+      SELECT o_orderkey, NVL(o_clerk, 'unassigned') AS clerk
+      FROM orders
+      WHERE o_orderkey <= 5
+    expected: |
+      SELECT o_orderkey, NVL(o_clerk, 'unassigned') AS clerk
+      FROM orders
+      WHERE o_orderkey <= 5
