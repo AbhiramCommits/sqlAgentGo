@@ -21,7 +21,10 @@ func newServeCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			a := agent.New(cfg)
+			a, sch, err := buildAgent(cmd.Context(), cfg, "serve", 0)
+			if err != nil {
+				return err
+			}
 
 			mux := http.NewServeMux()
 			mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -36,12 +39,25 @@ func newServeCmd() *cobra.Command {
 					writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 					return
 				}
-				out, err := a.Convert(r.Context(), req.Dialect, req.SQL, nil)
+				if req.Dialect == "" {
+					req.Dialect = "tsql"
+				}
+				st := &agent.State{
+					SourceSQL:     req.SQL,
+					SourceDialect: req.Dialect,
+					Schema:        *sch,
+				}
+				res, err := a.Run(r.Context(), st)
 				if err != nil {
-					writeJSON(w, http.StatusUnprocessableEntity, map[string]string{"error": err.Error()})
+					writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 					return
 				}
-				writeJSON(w, http.StatusOK, map[string]string{"converted": out})
+				writeJSON(w, http.StatusOK, map[string]any{
+					"converted":  st.Candidate,
+					"status":     st.Status,
+					"attempts":   st.Attempt,
+					"trace_path": res.TracePath,
+				})
 			})
 
 			return http.ListenAndServe(addr, mux)

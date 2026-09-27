@@ -12,10 +12,11 @@ type Config struct {
 }
 
 type LLM struct {
-	BaseURL    string `mapstructure:"base_url"`
-	Model      string `mapstructure:"model"`
-	APIKeyEnv  string `mapstructure:"api_key_env"`
-	MaxRetries int    `mapstructure:"max_retries"`
+	BaseURL     string  `mapstructure:"base_url"`
+	Model       string  `mapstructure:"model"`
+	APIKeyEnv   string  `mapstructure:"api_key_env"`
+	MaxRetries  int     `mapstructure:"max_retries"`
+	Temperature float64 `mapstructure:"temperature"`
 }
 
 // Load reads config files named "config" (yaml/json/...) from each path in
@@ -31,6 +32,7 @@ func Load(searchPaths ...string) (*Config, error) {
 	v.SetDefault("llm.model", "gpt-4o")
 	v.SetDefault("llm.api_key_env", "OPENAI_API_KEY")
 	v.SetDefault("llm.max_retries", 3)
+	v.SetDefault("llm.temperature", 0)
 	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
