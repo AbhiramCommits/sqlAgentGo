@@ -5,6 +5,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -79,11 +80,21 @@ ORDER BY table_name, ordinal_position`
 	return s, nil
 }
 
-// TableByName returns the named table or nil.
+// TableByName returns the named table or nil (case-insensitive).
 func (s *Schema) TableByName(name string) *Table {
 	for i := range s.Tables {
-		if s.Tables[i].Name == name {
+		if strings.EqualFold(s.Tables[i].Name, name) {
 			return &s.Tables[i]
+		}
+	}
+	return nil
+}
+
+// ColumnByName returns the named column or nil (case-insensitive).
+func (t *Table) ColumnByName(name string) *Column {
+	for i := range t.Columns {
+		if strings.EqualFold(t.Columns[i].Name, name) {
+			return &t.Columns[i]
 		}
 	}
 	return nil

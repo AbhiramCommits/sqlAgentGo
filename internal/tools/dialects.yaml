@@ -1,0 +1,67 @@
+constructs:
+  - name: "TOP n"
+    keywords: ["top"]
+    dialects: ["tsql"]
+    snowflake: "SELECT ... ORDER BY ... LIMIT n"
+    notes: |
+      T-SQL SELECT TOP n / TOP n PERCENT / TOP (n) is a SELECT modifier.
+      Snowflake has no TOP: append LIMIT n after ORDER BY (TOP PERCENT
+      becomes LIMIT round(n/100 * rowcount) via COUNT(*) OVER ()).
+  - name: "ISNULL"
+    keywords: ["isnull"]
+    dialects: ["tsql"]
+    snowflake: "IFNULL(expr, repl) or COALESCE(expr, repl)"
+    notes: |
+      T-SQL ISNULL takes exactly 2 args and coerces the result to the first
+      argument's type. Snowflake IFNULL keeps that shape; COALESCE (ANSI)
+      prefers the highest common type and accepts >2 args.
+  - name: "GETDATE() / SYSDATE"
+    keywords: ["getdate", "sysdate"]
+    dialects: ["tsql", "oracle"]
+    snowflake: "CURRENT_TIMESTAMP()"
+    notes: |
+      GETDATE() (T-SQL) and SYSDATE (Oracle) both become
+      CURRENT_TIMESTAMP() in Snowflake.
+  - name: "NVL"
+    keywords: ["nvl"]
+    dialects: ["oracle"]
+    snowflake: "COALESCE(expr, repl)"
+    notes: |
+      Oracle NVL(expr, repl) maps to COALESCE(expr, repl). NVL2(expr, a, b)
+      maps to IFF(expr IS NOT NULL, a, b).
+  - name: "CONVERT"
+    keywords: ["convert"]
+    dialects: ["tsql"]
+    snowflake: "CAST(expr AS type) / TO_DATE / TO_NUMBER / TO_VARCHAR / TO_TIMESTAMP"
+    notes: |
+      T-SQL CONVERT(type, expr [, style]) has the type as its FIRST argument
+      (reversed vs CAST). Style codes (e.g. 120 = yyyy-mm-dd hh:mi:ss) have no
+      Snowflake equivalent: use TO_VARCHAR(expr, 'format-model').
+  - name: "DATEADD / DATEDIFF"
+    keywords: ["dateadd", "datediff", "months_between"]
+    dialects: ["tsql", "oracle"]
+    snowflake: "DATEADD(unit, n, date) / DATEDIFF(unit, start, end)"
+    notes: |
+      T-SQL DATEADD(datepart, number, date) keeps the SAME argument order in
+      Snowflake, but datepart names differ ('dd' -> 'DAY', 'wk' -> 'WEEK').
+      T-SQL DATEDIFF(datepart, start, end) also keeps its order, renamed to
+      DATEDIFF(unit, start, end). Oracle has neither: use date + INTERVAL
+      'n' unit, or MONTHS_BETWEEN(end, start) for months.
+  - name: "ROWNUM"
+    keywords: ["rownum"]
+    dialects: ["oracle"]
+    snowflake: "QUALIFY ROW_NUMBER() OVER (ORDER BY ...) <= n"
+    notes: |
+      Oracle ROWNUM is assigned before ORDER BY, so top-N is usually written
+      with a wrapped ordered subquery. Snowflake: either ORDER BY ... LIMIT n
+      for plain top-N, or QUALIFY ROW_NUMBER() OVER (ORDER BY ...) <= n when
+      the row number must reflect windowing semantics.
+  - name: "String concatenation"
+    keywords: ["+", "||", "concat", "concatenation"]
+    dialects: ["tsql", "oracle"]
+    snowflake: "|| operator (or CONCAT())"
+    notes: |
+      T-SQL concatenates with +, which is ambiguous with numeric addition and
+      silently converts operands; Snowflake uses ||. Oracle || maps directly,
+      but Oracle treats '' as NULL (so x || '' = x) while Snowflake ||
+      propagates NULL: wrap with IFNULL/COALESCE to preserve behavior.
