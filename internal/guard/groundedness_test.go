@@ -199,6 +199,26 @@ func TestCheckGrounded(t *testing.T) {
 			sql:       "SELECT count(*) FROM lineitem",
 			wantViols: 0,
 		},
+		{
+			name:      "cte outputs ground unqualified columns",
+			sql:       "WITH ranked AS (SELECT o_orderkey, o_totalprice FROM orders) SELECT o_orderkey FROM ranked",
+			wantViols: 0,
+		},
+		{
+			name:      "anonymous subquery outputs are visible",
+			sql:       "SELECT o_orderkey, rn FROM (SELECT o_orderkey, ROW_NUMBER() OVER (ORDER BY o_totalprice DESC) AS rn FROM orders) WHERE rn <= 10",
+			wantViols: 0,
+		},
+		{
+			name:      "order by without qualifier",
+			sql:       "SELECT o_orderkey FROM orders ORDER BY o_orderkey DESC",
+			wantViols: 0,
+		},
+		{
+			name:      "qualified order by with descending",
+			sql:       "SELECT c.c_name, o.o_orderkey FROM customer c LEFT JOIN orders o ON o.o_custkey = c.c_custkey ORDER BY c.c_custkey, o.o_orderkey DESC",
+			wantViols: 0,
+		},
 	}
 
 	for _, tt := range tests {

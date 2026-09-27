@@ -51,9 +51,13 @@ func WithExecutors(source, target exec.Executor) Option {
 	return func(a *Agent) { a.source, a.target = source, target }
 }
 
-// WithMaxAttempts overrides the default of 4.
+// WithMaxAttempts overrides the default of 4. Values <= 0 keep the default.
 func WithMaxAttempts(n int) Option {
-	return func(a *Agent) { a.maxAttempts = n }
+	return func(a *Agent) {
+		if n > 0 {
+			a.maxAttempts = n
+		}
+	}
 }
 
 // WithTraceDir sets the traces root directory.
@@ -67,9 +71,10 @@ func WithCaseID(id string) Option {
 }
 
 // Run executes the state machine against st, mutating st in place (Status,
-// Candidate, Attempt, Trace). The trace is persisted as JSONL at
-// traces/<case-id>/<timestamp>.jsonl; the returned RunResult carries the
-// final state, the trace path, and the total token usage.
+// Candidate, Attempt, FailureClass, Trace). The trace is persisted as JSONL
+// at traces/<case-id>/<timestamp>.jsonl (st.CaseID overrides the agent's
+// case id). On node failure a RunResult carrying the partial state and trace
+// path is returned alongside the error so harnesses can classify the run.
 func (a *Agent) Run(ctx context.Context, st *State) (*RunResult, error) {
 	if st == nil {
 		return nil, fmt.Errorf("agent: nil state")
@@ -80,6 +85,9 @@ func (a *Agent) Run(ctx context.Context, st *State) (*RunResult, error) {
 	if st.MaxAttempts <= 0 {
 		st.MaxAttempts = a.maxAttempts
 	}
+	if st.MaxAttempts <= 0 {
+		st.MaxAttempts = 4
+	}
 	if st.Attempt <= 0 {
 		st.Attempt = 1
 	}
@@ -88,7 +96,11 @@ func (a *Agent) Run(ctx context.Context, st *State) (*RunResult, error) {
 	}
 	st.Trace = nil
 
-	path := tracePath(a.tracesDir, a.caseID, time.Now())
+	caseID := a.caseID
+	if st.CaseID != "" {
+		caseID = st.CaseID
+	}
+	path := tracePath(a.tracesDir, caseID, time.Now())
 	r := &run{a: a, state: st, path: path}
 
 	// Persist whatever was recorded even when a node errors, so traces stay
@@ -99,23 +111,28 @@ func (a *Agent) Run(ctx context.Context, st *State) (*RunResult, error) {
 	nodes := r.nodes()
 	for steps := 0; node != ""; steps++ {
 		if steps >= maxNodeSteps {
-			return nil, fmt.Errorf("agent: did not terminate within %d node steps", maxNodeSteps)
+			return resultOf(st, path), fmt.Errorf("agent: did not terminate within %d node steps", maxNodeSteps)
 		}
 		fn, ok := nodes[node]
 		if !ok {
-			return nil, fmt.Errorf("agent: unknown node %q", node)
+			return resultOf(st, path), fmt.Errorf("agent: unknown node %q", node)
 		}
 		next, err := fn(ctx, st)
 		if err != nil {
-			return nil, fmt.Errorf("node %s: %w", node, err)
+			return resultOf(st, path), fmt.Errorf("node %s: %w", node, err)
 		}
 		node = next
 	}
 
 	if err := writeTrace(path, st.Trace); err != nil {
-		return nil, err
+		return resultOf(st, path), err
 	}
+	return resultOf(st, path), nil
+}
 
+// resultOf builds a RunResult from a finished (or failed) state, summing
+// token totals over the recorded trace.
+func resultOf(st *State, path string) *RunResult {
 	var promptTokens, completionTokens int
 	for _, s := range st.Trace {
 		promptTokens += s.PromptTokens
@@ -126,5 +143,5 @@ func (a *Agent) Run(ctx context.Context, st *State) (*RunResult, error) {
 		TracePath:        path,
 		PromptTokens:     promptTokens,
 		CompletionTokens: completionTokens,
-	}, nil
+	}
 }

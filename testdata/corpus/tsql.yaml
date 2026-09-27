@@ -1,0 +1,301 @@
+cases:
+  - id: tsql_top_n_orders
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      ORDER BY o_totalprice DESC
+      LIMIT 10
+    tags: [top_n]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      ORDER BY o_totalprice DESC
+      LIMIT 10
+  - id: tsql_top_n_percent
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      ORDER BY o_totalprice DESC
+      LIMIT (SELECT count(*) * 10 / 100 FROM orders)
+    tags: [top_n]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      ORDER BY o_totalprice DESC
+      LIMIT 20
+  - id: tsql_isnull
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, COALESCE(o_clerk, 'unassigned') AS clerk
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [null_fn]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT o_orderkey, IFNULL(o_clerk, 'unassigned') AS clerk
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: tsql_null_comparison
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, o_clerk
+      FROM orders
+      WHERE o_clerk IS NULL OR o_clerk = ''
+      ORDER BY o_orderkey
+    tags: [null_fn]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey, o_clerk
+      FROM orders
+      WHERE o_clerk IS NULL OR o_clerk = ''
+      ORDER BY o_orderkey
+  - id: tsql_dateadd_days
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, o_orderdate, o_orderdate + 7 AS due_date
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [date_fn]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT o_orderkey, o_orderdate, DATEADD(day, 7, o_orderdate) AS due_date
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: tsql_datediff_trap
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, o_orderdate,
+             (o_orderdate - DATE '1992-01-01') AS days_since_epoch
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [date_fn]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT o_orderkey, o_orderdate,
+             DATEDIFF(day, '1992-01-01', o_orderdate) AS days_since_epoch
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: tsql_getdate_age
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey,
+             DATE '1993-06-15' - o_orderdate AS age_days
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [date_fn]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT o_orderkey,
+             DATEDIFF(day, o_orderdate, '1993-06-15') AS age_days
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: tsql_datepart_extract
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey,
+             EXTRACT(YEAR FROM o_orderdate) AS yr,
+             EXTRACT(MONTH FROM o_orderdate) AS mo,
+             EXTRACT(DAY FROM o_orderdate) AS dy
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [date_fn]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey,
+             YEAR(o_orderdate) AS yr,
+             MONTH(o_orderdate) AS mo,
+             DAY(o_orderdate) AS dy
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: tsql_string_concat
+    source_dialect: tsql
+    source_sql: |
+      SELECT c_custkey, c_name || ' [' || c_mktsegment || ']' AS label
+      FROM customer
+      WHERE c_custkey <= 5
+      ORDER BY c_custkey
+    tags: [string_fn]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT c_custkey, c_name || ' [' || c_mktsegment || ']' AS label
+      FROM customer
+      WHERE c_custkey <= 5
+      ORDER BY c_custkey
+  - id: tsql_string_functions
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey,
+             UPPER(o_orderpriority) AS prio,
+             LENGTH(o_comment) AS comment_len,
+             SUBSTRING(o_comment FROM 1 FOR 15) AS snippet
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [string_fn]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey,
+             UPPER(o_orderpriority) AS prio,
+             LENGTH(o_comment) AS comment_len,
+             SUBSTR(o_comment, 1, 15) AS snippet
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: tsql_join_two
+    source_dialect: tsql
+    source_sql: |
+      SELECT c.c_name, o.o_orderkey, o.o_totalprice
+      FROM customer c
+      JOIN orders o ON o.o_custkey = c.c_custkey
+      WHERE c.c_custkey <= 5
+      ORDER BY c.c_custkey, o.o_orderkey
+    tags: [join]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT c.c_name, o.o_orderkey, o.o_totalprice
+      FROM customer c
+      JOIN orders o ON o.o_custkey = c.c_custkey
+      WHERE c.c_custkey <= 5
+      ORDER BY c.c_custkey, o.o_orderkey
+  - id: tsql_cte_aggregate
+    source_dialect: tsql
+    source_sql: |
+      WITH ord_counts AS (
+        SELECT o_custkey, count(*) AS n_orders
+        FROM orders
+        GROUP BY o_custkey
+      )
+      SELECT c.c_name, oc.n_orders
+      FROM customer c
+      JOIN ord_counts oc ON oc.o_custkey = c.c_custkey
+      ORDER BY oc.n_orders DESC, c.c_custkey
+      LIMIT 10
+    tags: [cte, join]
+    difficulty: medium
+    expected_target_sql: |
+      WITH ord_counts AS (
+        SELECT o_custkey, count(*) AS n_orders
+        FROM orders
+        GROUP BY o_custkey
+      )
+      SELECT c.c_name, oc.n_orders
+      FROM customer c
+      JOIN ord_counts oc ON oc.o_custkey = c.c_custkey
+      ORDER BY oc.n_orders DESC, c.c_custkey
+      LIMIT 10
+  - id: tsql_window_row_number
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, o_custkey,
+             ROW_NUMBER() OVER (PARTITION BY o_custkey ORDER BY o_orderdate) AS rn
+      FROM orders
+      WHERE o_custkey <= 10
+      ORDER BY o_custkey, o_orderkey
+      LIMIT 25
+    tags: [window]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey, o_custkey,
+             ROW_NUMBER() OVER (PARTITION BY o_custkey ORDER BY o_orderdate) AS rn
+      FROM orders
+      WHERE o_custkey <= 10
+      ORDER BY o_custkey, o_orderkey
+      LIMIT 25
+  - id: tsql_window_running_total
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, o_totalprice,
+             SUM(o_totalprice) OVER (ORDER BY o_orderkey ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+      FROM orders
+      WHERE o_orderkey <= 10
+      ORDER BY o_orderkey
+    tags: [window]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey, o_totalprice,
+             SUM(o_totalprice) OVER (ORDER BY o_orderkey ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+      FROM orders
+      WHERE o_orderkey <= 10
+      ORDER BY o_orderkey
+  - id: tsql_correlated_scalar
+    source_dialect: tsql
+    source_sql: |
+      SELECT c.c_name,
+             (SELECT count(*) FROM orders o WHERE o.o_custkey = c.c_custkey) AS order_cnt
+      FROM customer c
+      WHERE c_custkey <= 15
+      ORDER BY c_custkey
+    tags: [join]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT c.c_name,
+             (SELECT count(*) FROM orders o WHERE o.o_custkey = c.c_custkey) AS order_cnt
+      FROM customer c
+      WHERE c_custkey <= 15
+      ORDER BY c_custkey
+  - id: tsql_correlated_exists
+    source_dialect: tsql
+    source_sql: |
+      SELECT c.c_name, c_custkey
+      FROM customer c
+      WHERE c_custkey <= 30
+        AND EXISTS (SELECT 1 FROM orders o
+                    WHERE o.o_custkey = c.c_custkey AND o.o_totalprice > 9000)
+      ORDER BY c_custkey
+    tags: [join]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT c.c_name, c_custkey
+      FROM customer c
+      WHERE c_custkey <= 30
+        AND EXISTS (SELECT 1 FROM orders o
+                    WHERE o.o_custkey = c.c_custkey AND o.o_totalprice > 9000)
+      ORDER BY c_custkey
+  - id: tsql_implicit_cast_compare
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      WHERE o_totalprice > '9000.00'
+      ORDER BY o_totalprice DESC
+      LIMIT 5
+    tags: [implicit_cast]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      WHERE o_totalprice > 9000.00
+      ORDER BY o_totalprice DESC
+      LIMIT 5
+  - id: tsql_convert_style
+    source_dialect: tsql
+    source_sql: |
+      SELECT o_orderkey,
+             CAST(o_totalprice AS VARCHAR(20)) AS price_text,
+             CAST(o_orderdate AS VARCHAR(10)) AS date_text
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [implicit_cast]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey,
+             TO_VARCHAR(o_totalprice) AS price_text,
+             TO_VARCHAR(o_orderdate, 'YYYY-MM-DD') AS date_text
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey

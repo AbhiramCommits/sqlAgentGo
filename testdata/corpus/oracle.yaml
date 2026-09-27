@@ -1,0 +1,284 @@
+cases:
+  - id: orcl_rownum_top_n
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM (SELECT o_orderkey, o_totalprice FROM orders ORDER BY o_totalprice DESC) t
+      LIMIT 10
+    tags: [rownum, top_n]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      ORDER BY o_totalprice DESC
+      LIMIT 10
+  - id: orcl_rownum_order_trap
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM (SELECT o_orderkey, o_totalprice,
+                   ROW_NUMBER() OVER (ORDER BY o_totalprice DESC) AS rn
+            FROM orders) t
+      WHERE rn <= 5
+      ORDER BY rn
+    tags: [rownum, window]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      QUALIFY ROW_NUMBER() OVER (ORDER BY o_totalprice DESC) <= 5
+      ORDER BY o_totalprice DESC
+  - id: orcl_nvl
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, COALESCE(o_clerk, 'unassigned') AS clerk
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [null_fn]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT o_orderkey, COALESCE(o_clerk, 'unassigned') AS clerk
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: orcl_nulls_last
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, o_clerk
+      FROM orders
+      WHERE o_orderkey <= 15
+      ORDER BY o_clerk NULLS LAST, o_orderkey
+    tags: [null_fn]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey, o_clerk
+      FROM orders
+      WHERE o_orderkey <= 15
+      ORDER BY o_clerk NULLS LAST, o_orderkey
+  - id: orcl_sysdate_age
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, (DATE '1993-06-15' - o_orderdate) AS age_days
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [date_fn]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT o_orderkey, DATEDIFF(day, o_orderdate, '1993-06-15') AS age_days
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: orcl_add_months
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, o_orderdate,
+             o_orderdate + INTERVAL '3 months' AS follow_up
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [date_fn]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey, o_orderdate,
+             DATEADD(month, 3, o_orderdate) AS follow_up
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: orcl_months_between
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, o_orderdate,
+             ROUND((DATE '1993-06-15' - o_orderdate) / 30.5) AS months_ago
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [date_fn]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT o_orderkey, o_orderdate,
+             DATEDIFF(month, o_orderdate, '1993-06-15') AS months_ago
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: orcl_string_concat
+    source_dialect: oracle
+    source_sql: |
+      SELECT c_custkey, c_name || ', ' || c_address AS contact
+      FROM customer
+      WHERE c_custkey <= 5
+      ORDER BY c_custkey
+    tags: [string_fn]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT c_custkey, c_name || ', ' || c_address AS contact
+      FROM customer
+      WHERE c_custkey <= 5
+      ORDER BY c_custkey
+  - id: orcl_substr
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, SUBSTR(o_comment, 1, 20) AS snippet
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+    tags: [string_fn]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey, SUBSTR(o_comment, 1, 20) AS snippet
+      FROM orders
+      WHERE o_orderkey <= 5
+      ORDER BY o_orderkey
+  - id: orcl_outer_join
+    source_dialect: oracle
+    source_sql: |
+      SELECT c.c_name, o.o_orderkey
+      FROM customer c
+      LEFT JOIN orders o ON o.o_custkey = c.c_custkey AND o.o_totalprice > 9500
+      WHERE c.c_custkey <= 10
+      ORDER BY c.c_custkey, o.o_orderkey NULLS LAST
+    tags: [join]
+    difficulty: easy
+    expected_target_sql: |
+      SELECT c.c_name, o.o_orderkey
+      FROM customer c
+      LEFT OUTER JOIN orders o
+        ON o.o_custkey = c.c_custkey AND o.o_totalprice > 9500
+      WHERE c.c_custkey <= 10
+      ORDER BY c.c_custkey, o.o_orderkey NULLS LAST
+  - id: orcl_cte_window_page
+    source_dialect: oracle
+    source_sql: |
+      WITH ranked AS (
+        SELECT o_orderkey, o_totalprice,
+               ROW_NUMBER() OVER (ORDER BY o_totalprice DESC) AS rn
+        FROM orders
+      )
+      SELECT o_orderkey, o_totalprice
+      FROM ranked
+      WHERE rn BETWEEN 6 AND 10
+      ORDER BY rn
+    tags: [cte, window]
+    difficulty: hard
+    expected_target_sql: |
+      WITH ranked AS (
+        SELECT o_orderkey, o_totalprice,
+               ROW_NUMBER() OVER (ORDER BY o_totalprice DESC) AS rn
+        FROM orders
+      )
+      SELECT o_orderkey, o_totalprice
+      FROM ranked
+      WHERE rn BETWEEN 6 AND 10
+      ORDER BY rn
+  - id: orcl_correlated_exists
+    source_dialect: oracle
+    source_sql: |
+      SELECT c.c_name
+      FROM customer c
+      WHERE c_custkey <= 25
+        AND EXISTS (SELECT 1 FROM orders o
+                    WHERE o.o_custkey = c.c_custkey AND o.o_totalprice > 8000)
+      ORDER BY c_custkey
+    tags: [join]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT c.c_name
+      FROM customer c
+      WHERE c_custkey <= 25
+        AND EXISTS (SELECT 1 FROM orders o
+                    WHERE o.o_custkey = c.c_custkey AND o.o_totalprice > 8000)
+      ORDER BY c_custkey
+  - id: orcl_implicit_cast_number
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey
+      FROM orders
+      WHERE o_shippriority = '1'
+      ORDER BY o_orderkey
+      LIMIT 5
+    tags: [implicit_cast]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT o_orderkey
+      FROM orders
+      WHERE o_shippriority = 1
+      ORDER BY o_orderkey
+      LIMIT 5
+  - id: orcl_window_rank
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, o_custkey, o_totalprice,
+             RANK() OVER (PARTITION BY o_custkey ORDER BY o_totalprice DESC) AS rnk
+      FROM orders
+      WHERE o_custkey <= 5
+      ORDER BY o_custkey, rnk, o_orderkey
+      LIMIT 25
+    tags: [window]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey, o_custkey, o_totalprice,
+             RANK() OVER (PARTITION BY o_custkey ORDER BY o_totalprice DESC) AS rnk
+      FROM orders
+      WHERE o_custkey <= 5
+      ORDER BY o_custkey, rnk, o_orderkey
+      LIMIT 25
+  - id: orcl_cte_join_top
+    source_dialect: oracle
+    source_sql: |
+      WITH big_spenders AS (
+        SELECT o_custkey, SUM(o_totalprice) AS total
+        FROM orders
+        GROUP BY o_custkey
+      )
+      SELECT c.c_name, bs.total
+      FROM customer c
+      JOIN big_spenders bs ON bs.o_custkey = c.c_custkey
+      ORDER BY bs.total DESC, c_custkey
+      LIMIT 10
+    tags: [cte, join]
+    difficulty: medium
+    expected_target_sql: |
+      WITH big_spenders AS (
+        SELECT o_custkey, SUM(o_totalprice) AS total
+        FROM orders
+        GROUP BY o_custkey
+      )
+      SELECT c.c_name, bs.total
+      FROM customer c
+      JOIN big_spenders bs ON bs.o_custkey = c.c_custkey
+      ORDER BY bs.total DESC, c_custkey
+      LIMIT 10
+  - id: orcl_nested_subquery
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      WHERE o_totalprice > (SELECT AVG(o_totalprice) FROM orders)
+      ORDER BY o_totalprice DESC
+      LIMIT 10
+    tags: [join]
+    difficulty: medium
+    expected_target_sql: |
+      SELECT o_orderkey, o_totalprice
+      FROM orders
+      WHERE o_totalprice > (SELECT AVG(o_totalprice) FROM orders)
+      ORDER BY o_totalprice DESC
+      LIMIT 10
+  - id: orcl_top_per_partition
+    source_dialect: oracle
+    source_sql: |
+      SELECT o_orderkey, o_custkey, o_totalprice
+      FROM (SELECT o_orderkey, o_custkey, o_totalprice,
+                   ROW_NUMBER() OVER (PARTITION BY o_custkey ORDER BY o_totalprice DESC) AS rn
+            FROM orders) t
+      WHERE rn = 1 AND o_custkey <= 10
+      ORDER BY o_custkey
+    tags: [rownum, window]
+    difficulty: hard
+    expected_target_sql: |
+      SELECT o_orderkey, o_custkey, o_totalprice
+      FROM orders
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY o_custkey ORDER BY o_totalprice DESC) = 1
+      WHERE o_custkey <= 10
+      ORDER BY o_custkey

@@ -66,11 +66,13 @@ type tableSource struct {
 }
 
 // scopeFrame holds names visible in one SELECT scope: aliases, CTE names,
-// referenced schema tables (for unqualified resolution), and the select
-// list's own output names (so ORDER BY/GROUP BY aliases resolve).
+// referenced schema tables (for unqualified resolution), anonymous subquery
+// outputs, and the select list's own output names (so ORDER BY/GROUP BY
+// aliases resolve).
 type scopeFrame struct {
 	sources  map[string]*tableSource
 	schemaTs []*schema.Table
+	anon     []*tableSource
 	selfOut  map[string]bool
 	selfStar bool
 }
@@ -141,13 +143,16 @@ func (c *collector) walkNode(n interface{}) {
 		c.exitSelect()
 
 	case *tree.SelectClause:
-		c.recordSelfOutputs(node)
 		// FROM first so aliases exist before columns are checked.
 		for _, t := range node.From.Tables {
 			c.walkNode(t)
 		}
+		// The select list itself is checked strictly: selfOut is only
+		// populated AFTER the list, so a hallucinated column cannot hide
+		// behind its own alias.
 		c.walkNode(node.Exprs)
 		c.walkNode(node.Where)
+		c.recordSelfOutputs(node)
 		c.walkNode(node.GroupBy)
 		c.walkNode(node.Having)
 		for _, e := range node.DistinctOn {
@@ -364,7 +369,7 @@ func (c *collector) enterSelect(sel *tree.Select) {
 	c.frames = append(c.frames, f)
 	if sel.With != nil {
 		for _, cte := range sel.With.CTEList {
-			name := strings.ToLower(cte.Name.Alias.String())
+			name := strings.ToLower(string(cte.Name.Alias))
 			if name == "" {
 				continue
 			}
@@ -410,10 +415,13 @@ func (c *collector) lookupSource(name string) *tableSource {
 // visitTableName resolves a FROM table against CTEs (innermost first, so a
 // CTE shadows a schema table) and then the introspected schema.
 func (c *collector) visitTableName(tn *tree.TableName) {
-	name := strings.ToLower(tn.TableName.String())
-	if name == "" {
+	// Compare the raw Name, not its String(): tree.Name("").String() renders
+	// the quoted empty marker `""`, which would look non-empty here.
+	raw := string(tn.TableName)
+	if raw == "" {
 		return
 	}
+	name := strings.ToLower(raw)
 	if src := c.lookupSource(name); src != nil {
 		c.tableCache[tn] = src
 		return
@@ -432,12 +440,11 @@ func (c *collector) visitTableName(tn *tree.TableName) {
 	c.tableCache[tn] = src
 }
 
-// registerAlias binds a FROM item's alias to its resolved source.
+// registerAlias binds a FROM item's alias to its resolved source. A subquery
+// without an alias still makes its outputs visible for unqualified column
+// resolution in the enclosing SELECT.
 func (c *collector) registerAlias(ate *tree.AliasedTableExpr) {
-	alias := strings.ToLower(ate.As.Alias.String())
-	if alias == "" {
-		return
-	}
+	alias := strings.ToLower(string(ate.As.Alias))
 	var src *tableSource
 	switch e := ate.Expr.(type) {
 	case *tree.TableName:
@@ -449,6 +456,12 @@ func (c *collector) registerAlias(ate *tree.AliasedTableExpr) {
 	}
 	if src == nil {
 		src = &tableSource{name: alias}
+	}
+	if alias == "" {
+		// Anonymous subquery: its outputs stay resolvable, but it binds no
+		// qualifier.
+		c.top().anon = append(c.top().anon, src)
+		return
 	}
 	c.top().sources[alias] = src
 }
@@ -535,6 +548,11 @@ func (c *collector) checkUnqualifiedColumn(col string) {
 				}
 				continue
 			}
+			if outputsContain(src.outputs, col) {
+				return
+			}
+		}
+		for _, src := range f.anon {
 			if outputsContain(src.outputs, col) {
 				return
 			}
@@ -657,7 +675,8 @@ func selectOutputsOfSelect(sel *tree.Select) []string {
 // are skipped. star reports SELECT * (or t.*).
 func clauseOutputs(cl *tree.SelectClause) (out []string, star bool) {
 	for _, e := range cl.Exprs {
-		if as := strings.ToLower(e.As.String()); as != "" {
+		// Raw string, not String(): empty UnrestrictedName renders `""`.
+		if as := strings.ToLower(string(e.As)); as != "" {
 			out = append(out, as)
 			continue
 		}

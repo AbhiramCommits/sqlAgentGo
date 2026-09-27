@@ -272,6 +272,48 @@ func readTraceSteps(t *testing.T, path string) []Step {
 
 // --- tests --------------------------------------------------------------------
 
+// TestAgentDefaultMaxAttemptsAllowsRepair: without WithMaxAttempts the agent
+// must still use its default budget (4) and repair, not exhaust on the first
+// failure (regression: a 0 max-attempts plumbing bug made the loop
+// single-shot).
+func TestAgentDefaultMaxAttemptsAllowsRepair(t *testing.T) {
+	fake := &fakeLLM{actResponses: []fakeResp{
+		sqlResp("SELECT o_orderkey, o_bogus FROM orders"),
+		sqlResp("SELECT count(*) FROM orders"),
+	}}
+	srv := httptest.NewServer(fake)
+	defer srv.Close()
+
+	tracesDir := t.TempDir()
+	client := llm.New(llm.Config{
+		BaseURL:        srv.URL,
+		Model:          "test-model",
+		MaxRetries:     0,
+		RetryBaseDelay: time.Millisecond,
+	})
+	a := New(client, testRegistry(testSchema()),
+		WithExecutors(seededDuckDB(t), seededDuckDB(t)),
+		WithTraceDir(tracesDir),
+		WithCaseID("case-default-attempts"))
+
+	st := &State{
+		SourceSQL:     "SELECT count(*) FROM orders",
+		SourceDialect: "tsql",
+		Schema:        *testSchema(),
+	}
+	res, err := a.Run(context.Background(), st)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if st.Status != StatusGreen || st.Attempt != 2 {
+		t.Fatalf("status=%q attempts=%d, want green in 2 attempts", st.Status, st.Attempt)
+	}
+	if st.MaxAttempts != 4 {
+		t.Fatalf("default max attempts = %d, want 4", st.MaxAttempts)
+	}
+	_ = res
+}
+
 // TestAgentReachesGreenInTwoAttempts drives the full loop against a scripted
 // responder: attempt 1 emits a hallucinated column (guard rejects it without
 // executing), attempt 2 emits valid SQL (verify diffs clean). The run must

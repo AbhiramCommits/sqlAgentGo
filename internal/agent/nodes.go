@@ -113,6 +113,8 @@ func (r *run) actNode(ctx context.Context, st *State) (string, error) {
 			candidate := extractSQL(resp.Content)
 			if candidate == "" {
 				r.failure = "model returned neither SQL nor tool calls"
+				st.FailureClass = FailureExhausted
+				step.FailureClass = st.FailureClass
 				step.Detail = r.failure
 				step.LatencyMs = time.Since(start).Milliseconds()
 				r.record(step)
@@ -147,6 +149,8 @@ func (r *run) actNode(ctx context.Context, st *State) (string, error) {
 	}
 
 	r.failure = fmt.Sprintf("model did not produce final SQL within %d tool-call rounds", maxToolRounds)
+	st.FailureClass = FailureExhausted
+	step.FailureClass = st.FailureClass
 	step.Detail = r.failure
 	step.LatencyMs = time.Since(start).Milliseconds()
 	r.record(step)
@@ -164,8 +168,11 @@ func (r *run) guardNode(ctx context.Context, st *State) (string, error) {
 	step := Step{Node: NodeGuard, Status: st.Status, Attempt: st.Attempt}
 
 	viols, err := guard.CheckGrounded(st.Candidate, &st.Schema)
+	step.Violations = len(viols)
 	if err != nil {
 		r.failure = "guard could not parse candidate SQL: " + err.Error()
+		st.FailureClass = FailureExecError
+		step.FailureClass = st.FailureClass
 		step.Detail = r.failure
 		step.LatencyMs = time.Since(start).Milliseconds()
 		r.record(step)
@@ -177,6 +184,8 @@ func (r *run) guardNode(ctx context.Context, st *State) (string, error) {
 			msgs[i] = v.String()
 		}
 		r.failure = strings.Join(msgs, "; ")
+		st.FailureClass = FailureGuardViolation
+		step.FailureClass = st.FailureClass
 		step.Detail = r.failure
 		step.LatencyMs = time.Since(start).Milliseconds()
 		r.record(step)
@@ -201,6 +210,8 @@ func (r *run) verifyNode(ctx context.Context, st *State) (string, error) {
 
 	if r.a.source == nil || r.a.target == nil {
 		r.failure = "verification requires source and target executors"
+		st.FailureClass = FailureExecError
+		step.FailureClass = st.FailureClass
 		step.Detail = r.failure
 		step.LatencyMs = time.Since(start).Milliseconds()
 		r.record(step)
@@ -210,6 +221,8 @@ func (r *run) verifyNode(ctx context.Context, st *State) (string, error) {
 	srcRes, err := r.a.source.Run(ctx, st.SourceSQL)
 	if err != nil {
 		r.failure = "source engine error: " + err.Error()
+		st.FailureClass = FailureExecError
+		step.FailureClass = st.FailureClass
 		step.Detail = r.failure
 		step.LatencyMs = time.Since(start).Milliseconds()
 		r.record(step)
@@ -218,6 +231,8 @@ func (r *run) verifyNode(ctx context.Context, st *State) (string, error) {
 	tgtRes, err := r.a.target.Run(ctx, st.Candidate)
 	if err != nil {
 		r.failure = "target engine error: " + err.Error()
+		st.FailureClass = FailureExecError
+		step.FailureClass = st.FailureClass
 		step.Detail = r.failure
 		step.LatencyMs = time.Since(start).Milliseconds()
 		r.record(step)
@@ -230,12 +245,15 @@ func (r *run) verifyNode(ctx context.Context, st *State) (string, error) {
 
 	if report.Equal {
 		st.Status = StatusGreen
+		st.FailureClass = ""
 		step.Status = st.Status
 		r.record(step)
 		return "", nil
 	}
 
 	r.failure = diffFailure(report)
+	st.FailureClass = FailureResultMismatch
+	step.FailureClass = st.FailureClass
 	r.record(step)
 	return NodeRepair, nil
 }
@@ -261,11 +279,15 @@ func diffFailure(report exec.DiffReport) string {
 func (r *run) repairNode(ctx context.Context, st *State) (string, error) {
 	if st.Attempt >= st.MaxAttempts {
 		st.Status = StatusExhausted
+		if st.FailureClass == "" {
+			st.FailureClass = FailureExhausted
+		}
 		r.record(Step{
-			Node:    NodeRepair,
-			Status:  st.Status,
-			Attempt: st.Attempt,
-			Detail:  fmt.Sprintf("max attempts (%d) reached; last failure: %s", st.MaxAttempts, r.failure),
+			Node:         NodeRepair,
+			Status:       st.Status,
+			Attempt:      st.Attempt,
+			FailureClass: st.FailureClass,
+			Detail:       fmt.Sprintf("max attempts (%d) reached; last failure: %s", st.MaxAttempts, r.failure),
 		})
 		return "", nil
 	}

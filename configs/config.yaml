@@ -7,3 +7,23 @@ llm:
   api_key_env: "OPENAI_API_KEY"
   max_retries: 3
   temperature: 0
+
+# USD per 1M tokens, per model. "default" is the fallback entry; local
+# models cost nothing.
+pricing:
+  - model: default
+    prompt_usd_per_1m: 2.5
+    completion_usd_per_1m: 10.0
+  - model: gpt-4o
+    prompt_usd_per_1m: 2.5
+    completion_usd_per_1m: 10.0
+  - model: gpt-4o-mini
+    prompt_usd_per_1m: 0.15
+    completion_usd_per_1m: 0.6
+  - model: llama-3.3-70b
+    prompt_usd_per_1m: 0.88
+    completion_usd_per_1m: 0.88
+  - model: llama3.2:3b
+    prompt_usd_per_1m: 0.0
+    completion_usd_per_1m: 0.0
+

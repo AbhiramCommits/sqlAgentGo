@@ -33,6 +33,15 @@ const (
 	NodeRepair = "repair"
 )
 
+// FailureClass values recorded on failed runs.
+const (
+	FailureGuardViolation = "guard_violation"
+	FailureExecError      = "exec_error"
+	FailureResultMismatch = "result_mismatch"
+	FailureExhausted      = "exhausted"
+	FailureLLMError       = "llm_error"
+)
+
 // State is the full mutable state of one conversion run.
 type State struct {
 	SourceSQL     string
@@ -44,6 +53,11 @@ type State struct {
 	MaxAttempts   int // default 4, configurable
 	Trace         []Step
 	Status        string // planning|acting|verifying|repairing|green|exhausted
+	// FailureClass classifies a failed run for the evaluation harness:
+	// guard_violation | exec_error | result_mismatch | exhausted | llm_error.
+	FailureClass string
+	// CaseID overrides the agent's case id for the trace path of this run.
+	CaseID string
 }
 
 // Step is one recorded node execution; it is the unit of the JSONL trace.
@@ -54,6 +68,8 @@ type Step struct {
 	LatencyMs        int64            `json:"latency_ms"`
 	PromptTokens     int              `json:"prompt_tokens"`
 	CompletionTokens int              `json:"completion_tokens"`
+	Violations       int              `json:"violations,omitempty"`
+	FailureClass     string           `json:"failure_class,omitempty"`
 	ToolCalls        []ToolCallRecord `json:"tool_calls,omitempty"`
 	Candidate        string           `json:"candidate,omitempty"`
 	Detail           string           `json:"detail,omitempty"`

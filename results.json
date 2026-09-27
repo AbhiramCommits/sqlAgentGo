@@ -1,0 +1,1534 @@
+{
+  "generated_at": "2026-09-27T09:28:34Z",
+  "model": "llama3.2:3b",
+  "corpus": "testdata/corpus",
+  "max_attempts": 4,
+  "concurrency": 4,
+  "modes": [
+    "agent",
+    "baseline"
+  ],
+  "cases": [
+    {
+      "case_id": "orcl_rownum_top_n",
+      "source_dialect": "oracle",
+      "tags": [
+        "rownum",
+        "top_n"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 231290,
+      "prompt_tokens": 10351,
+      "completion_tokens": 684,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_rownum_top_n/20260927T085027.403024000.jsonl",
+      "similarity": 0.16666666666666666
+    },
+    {
+      "case_id": "orcl_rownum_top_n",
+      "source_dialect": "oracle",
+      "tags": [
+        "rownum",
+        "top_n"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 5609,
+      "prompt_tokens": 111,
+      "completion_tokens": 43,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_rownum_top_n/20260927T085027.402799000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_rownum_order_trap",
+      "source_dialect": "oracle",
+      "tags": [
+        "rownum",
+        "window"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 334596,
+      "prompt_tokens": 14015,
+      "completion_tokens": 779,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_rownum_order_trap/20260927T085027.402862000.jsonl",
+      "similarity": 0.2558139534883721
+    },
+    {
+      "case_id": "orcl_rownum_order_trap",
+      "source_dialect": "oracle",
+      "tags": [
+        "rownum",
+        "window"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 19306,
+      "prompt_tokens": 129,
+      "completion_tokens": 57,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_rownum_order_trap/20260927T085027.402749000.jsonl",
+      "similarity": 0.7333333333333333
+    },
+    {
+      "case_id": "orcl_nvl",
+      "source_dialect": "oracle",
+      "tags": [
+        "null_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 434789,
+      "prompt_tokens": 11979,
+      "completion_tokens": 776,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_nvl/20260927T085033.012257000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_nvl",
+      "source_dialect": "oracle",
+      "tags": [
+        "null_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 53908,
+      "prompt_tokens": 113,
+      "completion_tokens": 50,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_nvl/20260927T085046.709469000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_nulls_last",
+      "source_dialect": "oracle",
+      "tags": [
+        "null_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 452169,
+      "prompt_tokens": 21132,
+      "completion_tokens": 644,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_nulls_last/20260927T085140.619914000.jsonl",
+      "similarity": 0.28205128205128205
+    },
+    {
+      "case_id": "orcl_nulls_last",
+      "source_dialect": "oracle",
+      "tags": [
+        "null_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 21475,
+      "prompt_tokens": 110,
+      "completion_tokens": 47,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_nulls_last/20260927T085418.699856000.jsonl",
+      "similarity": 0.6923076923076923
+    },
+    {
+      "case_id": "orcl_sysdate_age",
+      "source_dialect": "oracle",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 221589,
+      "prompt_tokens": 10252,
+      "completion_tokens": 529,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_sysdate_age/20260927T085440.176412000.jsonl",
+      "similarity": 0.7894736842105263
+    },
+    {
+      "case_id": "orcl_sysdate_age",
+      "source_dialect": "oracle",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 47909,
+      "prompt_tokens": 118,
+      "completion_tokens": 58,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_sysdate_age/20260927T085602.007448000.jsonl",
+      "similarity": 0.8333333333333334
+    },
+    {
+      "case_id": "orcl_add_months",
+      "source_dialect": "oracle",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 257849,
+      "prompt_tokens": 12419,
+      "completion_tokens": 529,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_add_months/20260927T085649.918013000.jsonl",
+      "similarity": 0.6470588235294118
+    },
+    {
+      "case_id": "orcl_add_months",
+      "source_dialect": "oracle",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 40907,
+      "prompt_tokens": 117,
+      "completion_tokens": 56,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_add_months/20260927T085747.811712000.jsonl",
+      "similarity": 0.75
+    },
+    {
+      "case_id": "orcl_months_between",
+      "source_dialect": "oracle",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 502245,
+      "prompt_tokens": 33247,
+      "completion_tokens": 1023,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_months_between/20260927T085821.771579000.jsonl",
+      "similarity": 0.7368421052631579
+    },
+    {
+      "case_id": "orcl_months_between",
+      "source_dialect": "oracle",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 19008,
+      "prompt_tokens": 131,
+      "completion_tokens": 63,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_months_between/20260927T085828.720459000.jsonl",
+      "similarity": 0.7368421052631579
+    },
+    {
+      "case_id": "orcl_string_concat",
+      "source_dialect": "oracle",
+      "tags": [
+        "string_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 382349,
+      "prompt_tokens": 18197,
+      "completion_tokens": 601,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_string_concat/20260927T085847.729919000.jsonl",
+      "similarity": 0.9230769230769231
+    },
+    {
+      "case_id": "orcl_string_concat",
+      "source_dialect": "oracle",
+      "tags": [
+        "string_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 40796,
+      "prompt_tokens": 110,
+      "completion_tokens": 49,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_string_concat/20260927T085912.800405000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_substr",
+      "source_dialect": "oracle",
+      "tags": [
+        "string_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 336053,
+      "prompt_tokens": 23531,
+      "completion_tokens": 867,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_substr/20260927T085953.597542000.jsonl",
+      "similarity": 0.22413793103448276
+    },
+    {
+      "case_id": "orcl_substr",
+      "source_dialect": "oracle",
+      "tags": [
+        "string_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 26126,
+      "prompt_tokens": 113,
+      "completion_tokens": 50,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_substr/20260927T090107.774296000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_outer_join",
+      "source_dialect": "oracle",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 341783,
+      "prompt_tokens": 20340,
+      "completion_tokens": 832,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_outer_join/20260927T090133.901817000.jsonl",
+      "similarity": 0.4074074074074074
+    },
+    {
+      "case_id": "orcl_outer_join",
+      "source_dialect": "oracle",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 33618,
+      "prompt_tokens": 139,
+      "completion_tokens": 76,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_outer_join/20260927T090510.088851000.jsonl",
+      "similarity": 0.8333333333333334
+    },
+    {
+      "case_id": "orcl_cte_window_page",
+      "source_dialect": "oracle",
+      "tags": [
+        "cte",
+        "window"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 3,
+      "wall_time_ms": 329424,
+      "prompt_tokens": 9923,
+      "completion_tokens": 610,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_cte_window_page/20260927T090529.666880000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_cte_window_page",
+      "source_dialect": "oracle",
+      "tags": [
+        "cte",
+        "window"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 37414,
+      "prompt_tokens": 137,
+      "completion_tokens": 60,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_cte_window_page/20260927T090543.708759000.jsonl",
+      "similarity": 0.8947368421052632
+    },
+    {
+      "case_id": "orcl_correlated_exists",
+      "source_dialect": "oracle",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 320735,
+      "prompt_tokens": 19930,
+      "completion_tokens": 760,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_correlated_exists/20260927T090621.124694000.jsonl",
+      "similarity": 0.4
+    },
+    {
+      "case_id": "orcl_correlated_exists",
+      "source_dialect": "oracle",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 15090,
+      "prompt_tokens": 132,
+      "completion_tokens": 63,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_correlated_exists/20260927T090644.030283000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_implicit_cast_number",
+      "source_dialect": "oracle",
+      "tags": [
+        "implicit_cast"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 2,
+      "wall_time_ms": 190018,
+      "prompt_tokens": 3558,
+      "completion_tokens": 425,
+      "estimated_usd": 0,
+      "guard_violations": 2,
+      "trace_path": "traces/orcl_implicit_cast_number/20260927T090659.131891000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_implicit_cast_number",
+      "source_dialect": "oracle",
+      "tags": [
+        "implicit_cast"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 41244,
+      "prompt_tokens": 103,
+      "completion_tokens": 31,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_implicit_cast_number/20260927T090715.698470000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_window_rank",
+      "source_dialect": "oracle",
+      "tags": [
+        "window"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 2,
+      "wall_time_ms": 255135,
+      "prompt_tokens": 8708,
+      "completion_tokens": 620,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_window_rank/20260927T090756.945814000.jsonl",
+      "similarity": 0.9
+    },
+    {
+      "case_id": "orcl_window_rank",
+      "source_dialect": "oracle",
+      "tags": [
+        "window"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 58635,
+      "prompt_tokens": 141,
+      "completion_tokens": 75,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_window_rank/20260927T091009.155572000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_cte_join_top",
+      "source_dialect": "oracle",
+      "tags": [
+        "cte",
+        "join"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 2,
+      "wall_time_ms": 301776,
+      "prompt_tokens": 9094,
+      "completion_tokens": 663,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_cte_join_top/20260927T091059.099980000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_cte_join_top",
+      "source_dialect": "oracle",
+      "tags": [
+        "cte",
+        "join"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 24831,
+      "prompt_tokens": 153,
+      "completion_tokens": 67,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/orcl_cte_join_top/20260927T091107.794371000.jsonl",
+      "similarity": 0.7916666666666666
+    },
+    {
+      "case_id": "orcl_nested_subquery",
+      "source_dialect": "oracle",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 114295,
+      "prompt_tokens": 2262,
+      "completion_tokens": 276,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_nested_subquery/20260927T091132.627124000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_nested_subquery",
+      "source_dialect": "oracle",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 33564,
+      "prompt_tokens": 115,
+      "completion_tokens": 43,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_nested_subquery/20260927T091141.867749000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "orcl_top_per_partition",
+      "source_dialect": "oracle",
+      "tags": [
+        "rownum",
+        "window"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 2,
+      "wall_time_ms": 158862,
+      "prompt_tokens": 8181,
+      "completion_tokens": 649,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_top_per_partition/20260927T091212.087241000.jsonl",
+      "similarity": 0.75
+    },
+    {
+      "case_id": "orcl_top_per_partition",
+      "source_dialect": "oracle",
+      "tags": [
+        "rownum",
+        "window"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 27190,
+      "prompt_tokens": 152,
+      "completion_tokens": 80,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/orcl_top_per_partition/20260927T091215.432944000.jsonl",
+      "similarity": 0.7894736842105263
+    },
+    {
+      "case_id": "tsql_top_n_orders",
+      "source_dialect": "tsql",
+      "tags": [
+        "top_n"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 99026,
+      "prompt_tokens": 1295,
+      "completion_tokens": 167,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_top_n_orders/20260927T091242.624102000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "tsql_top_n_orders",
+      "source_dialect": "tsql",
+      "tags": [
+        "top_n"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 18187,
+      "prompt_tokens": 101,
+      "completion_tokens": 28,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_top_n_orders/20260927T091326.925788000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "tsql_top_n_percent",
+      "source_dialect": "tsql",
+      "tags": [
+        "top_n"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 74865,
+      "prompt_tokens": 1204,
+      "completion_tokens": 194,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_top_n_percent/20260927T091345.113900000.jsonl",
+      "similarity": 0.6923076923076923
+    },
+    {
+      "case_id": "tsql_top_n_percent",
+      "source_dialect": "tsql",
+      "tags": [
+        "top_n"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 22594,
+      "prompt_tokens": 111,
+      "completion_tokens": 46,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_top_n_percent/20260927T091421.653474000.jsonl",
+      "similarity": 0.6923076923076923
+    },
+    {
+      "case_id": "tsql_isnull",
+      "source_dialect": "tsql",
+      "tags": [
+        "null_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 88320,
+      "prompt_tokens": 1394,
+      "completion_tokens": 314,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_isnull/20260927T091444.249658000.jsonl",
+      "similarity": 0.8571428571428571
+    },
+    {
+      "case_id": "tsql_isnull",
+      "source_dialect": "tsql",
+      "tags": [
+        "null_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 24953,
+      "prompt_tokens": 114,
+      "completion_tokens": 47,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_isnull/20260927T091450.954942000.jsonl",
+      "similarity": 0.625
+    },
+    {
+      "case_id": "tsql_null_comparison",
+      "source_dialect": "tsql",
+      "tags": [
+        "null_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 370736,
+      "prompt_tokens": 11919,
+      "completion_tokens": 717,
+      "estimated_usd": 0,
+      "guard_violations": 1,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_null_comparison/20260927T091459.991615000.jsonl",
+      "similarity": 0.171875
+    },
+    {
+      "case_id": "tsql_null_comparison",
+      "source_dialect": "tsql",
+      "tags": [
+        "null_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 35139,
+      "prompt_tokens": 108,
+      "completion_tokens": 36,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_null_comparison/20260927T091515.910056000.jsonl",
+      "similarity": 0.6923076923076923
+    },
+    {
+      "case_id": "tsql_dateadd_days",
+      "source_dialect": "tsql",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 2,
+      "wall_time_ms": 175486,
+      "prompt_tokens": 3862,
+      "completion_tokens": 272,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_dateadd_days/20260927T091551.039908000.jsonl",
+      "similarity": 0.75
+    },
+    {
+      "case_id": "tsql_dateadd_days",
+      "source_dialect": "tsql",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 22164,
+      "prompt_tokens": 114,
+      "completion_tokens": 49,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_dateadd_days/20260927T091600.872201000.jsonl",
+      "similarity": 0.5555555555555556
+    },
+    {
+      "case_id": "tsql_datediff_trap",
+      "source_dialect": "tsql",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 3,
+      "wall_time_ms": 207494,
+      "prompt_tokens": 7897,
+      "completion_tokens": 756,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_datediff_trap/20260927T091612.560134000.jsonl",
+      "similarity": 0.8235294117647058
+    },
+    {
+      "case_id": "tsql_datediff_trap",
+      "source_dialect": "tsql",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 28845,
+      "prompt_tokens": 124,
+      "completion_tokens": 61,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "result_mismatch",
+      "trace_path": "traces/tsql_datediff_trap/20260927T091623.036461000.jsonl",
+      "similarity": 0.7058823529411765
+    },
+    {
+      "case_id": "tsql_getdate_age",
+      "source_dialect": "tsql",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "exhausted",
+      "attempts": 4,
+      "wall_time_ms": 302773,
+      "prompt_tokens": 10975,
+      "completion_tokens": 653,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_getdate_age/20260927T091651.886852000.jsonl",
+      "similarity": 0.65
+    },
+    {
+      "case_id": "tsql_getdate_age",
+      "source_dialect": "tsql",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 24780,
+      "prompt_tokens": 118,
+      "completion_tokens": 83,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_getdate_age/20260927T091846.528207000.jsonl",
+      "similarity": 0.65
+    },
+    {
+      "case_id": "tsql_datepart_extract",
+      "source_dialect": "tsql",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 115213,
+      "prompt_tokens": 1548,
+      "completion_tokens": 353,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_datepart_extract/20260927T091911.309722000.jsonl",
+      "similarity": 0.9411764705882353
+    },
+    {
+      "case_id": "tsql_datepart_extract",
+      "source_dialect": "tsql",
+      "tags": [
+        "date_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 28212,
+      "prompt_tokens": 140,
+      "completion_tokens": 72,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_datepart_extract/20260927T091940.059311000.jsonl",
+      "similarity": 0.9411764705882353
+    },
+    {
+      "case_id": "tsql_string_concat",
+      "source_dialect": "tsql",
+      "tags": [
+        "string_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 2,
+      "wall_time_ms": 347255,
+      "prompt_tokens": 9061,
+      "completion_tokens": 534,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_string_concat/20260927T092008.272599000.jsonl",
+      "similarity": 0.9230769230769231
+    },
+    {
+      "case_id": "tsql_string_concat",
+      "source_dialect": "tsql",
+      "tags": [
+        "string_fn"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 38637,
+      "prompt_tokens": 116,
+      "completion_tokens": 53,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_string_concat/20260927T092106.525335000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "tsql_string_functions",
+      "source_dialect": "tsql",
+      "tags": [
+        "string_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 110635,
+      "prompt_tokens": 2014,
+      "completion_tokens": 310,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_string_functions/20260927T092110.762084000.jsonl",
+      "similarity": 0.8571428571428571
+    },
+    {
+      "case_id": "tsql_string_functions",
+      "source_dialect": "tsql",
+      "tags": [
+        "string_fn"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 35829,
+      "prompt_tokens": 133,
+      "completion_tokens": 63,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_string_functions/20260927T092145.163535000.jsonl",
+      "similarity": 0.625
+    },
+    {
+      "case_id": "tsql_join_two",
+      "source_dialect": "tsql",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "easy",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 79057,
+      "prompt_tokens": 2130,
+      "completion_tokens": 301,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_join_two/20260927T092154.666560000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "tsql_join_two",
+      "source_dialect": "tsql",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "easy",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 34141,
+      "prompt_tokens": 132,
+      "completion_tokens": 71,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_join_two/20260927T092220.993476000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "tsql_cte_aggregate",
+      "source_dialect": "tsql",
+      "tags": [
+        "cte",
+        "join"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 110231,
+      "prompt_tokens": 2327,
+      "completion_tokens": 380,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_cte_aggregate/20260927T092255.136573000.jsonl",
+      "similarity": 0.9090909090909091
+    },
+    {
+      "case_id": "tsql_cte_aggregate",
+      "source_dialect": "tsql",
+      "tags": [
+        "cte",
+        "join"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 34865,
+      "prompt_tokens": 151,
+      "completion_tokens": 75,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_cte_aggregate/20260927T092301.399719000.jsonl",
+      "similarity": 0.8260869565217391
+    },
+    {
+      "case_id": "tsql_window_row_number",
+      "source_dialect": "tsql",
+      "tags": [
+        "window"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 120618,
+      "prompt_tokens": 2129,
+      "completion_tokens": 448,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_window_row_number/20260927T092313.725302000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "tsql_window_row_number",
+      "source_dialect": "tsql",
+      "tags": [
+        "window"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 49124,
+      "prompt_tokens": 133,
+      "completion_tokens": 67,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_window_row_number/20260927T092336.266023000.jsonl",
+      "similarity": 0.7
+    },
+    {
+      "case_id": "tsql_window_running_total",
+      "source_dialect": "tsql",
+      "tags": [
+        "window"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 2,
+      "wall_time_ms": 170039,
+      "prompt_tokens": 6101,
+      "completion_tokens": 559,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_window_running_total/20260927T092425.396423000.jsonl",
+      "similarity": 0.6190476190476191
+    },
+    {
+      "case_id": "tsql_window_running_total",
+      "source_dialect": "tsql",
+      "tags": [
+        "window"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 32768,
+      "prompt_tokens": 135,
+      "completion_tokens": 66,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_window_running_total/20260927T092445.370327000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "tsql_correlated_scalar",
+      "source_dialect": "tsql",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 107747,
+      "prompt_tokens": 1353,
+      "completion_tokens": 288,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_correlated_scalar/20260927T092514.346129000.jsonl",
+      "similarity": 0.8
+    },
+    {
+      "case_id": "tsql_correlated_scalar",
+      "source_dialect": "tsql",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 38254,
+      "prompt_tokens": 124,
+      "completion_tokens": 91,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_correlated_scalar/20260927T092518.140122000.jsonl",
+      "similarity": 0.6666666666666666
+    },
+    {
+      "case_id": "tsql_correlated_exists",
+      "source_dialect": "tsql",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 120245,
+      "prompt_tokens": 2115,
+      "completion_tokens": 348,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_correlated_exists/20260927T092555.534478000.jsonl",
+      "similarity": 0.8
+    },
+    {
+      "case_id": "tsql_correlated_exists",
+      "source_dialect": "tsql",
+      "tags": [
+        "join"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 56518,
+      "prompt_tokens": 137,
+      "completion_tokens": 84,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_correlated_exists/20260927T092556.395544000.jsonl",
+      "similarity": 0.8947368421052632
+    },
+    {
+      "case_id": "tsql_implicit_cast_compare",
+      "source_dialect": "tsql",
+      "tags": [
+        "implicit_cast"
+      ],
+      "difficulty": "hard",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 81714,
+      "prompt_tokens": 1256,
+      "completion_tokens": 224,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_implicit_cast_compare/20260927T092652.915959000.jsonl",
+      "similarity": 1
+    },
+    {
+      "case_id": "tsql_implicit_cast_compare",
+      "source_dialect": "tsql",
+      "tags": [
+        "implicit_cast"
+      ],
+      "difficulty": "hard",
+      "mode": "baseline",
+      "status": "green",
+      "attempts": 1,
+      "wall_time_ms": 34954,
+      "prompt_tokens": 112,
+      "completion_tokens": 40,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_implicit_cast_compare/20260927T092702.096073000.jsonl",
+      "similarity": 0.9285714285714286
+    },
+    {
+      "case_id": "tsql_convert_style",
+      "source_dialect": "tsql",
+      "tags": [
+        "implicit_cast"
+      ],
+      "difficulty": "medium",
+      "mode": "agent",
+      "status": "green",
+      "attempts": 2,
+      "wall_time_ms": 79461,
+      "prompt_tokens": 5297,
+      "completion_tokens": 285,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "trace_path": "traces/tsql_convert_style/20260927T092715.438760000.jsonl",
+      "similarity": 0.65
+    },
+    {
+      "case_id": "tsql_convert_style",
+      "source_dialect": "tsql",
+      "tags": [
+        "implicit_cast"
+      ],
+      "difficulty": "medium",
+      "mode": "baseline",
+      "status": "exhausted",
+      "attempts": 1,
+      "wall_time_ms": 37826,
+      "prompt_tokens": 128,
+      "completion_tokens": 60,
+      "estimated_usd": 0,
+      "guard_violations": 0,
+      "failure_class": "exec_error",
+      "trace_path": "traces/tsql_convert_style/20260927T092737.052122000.jsonl",
+      "similarity": 0.5416666666666666
+    }
+  ],
+  "scoreboards": {
+    "agent": {
+      "cases": 35,
+      "passed": 22,
+      "pass_rate": 0.6285714285714286,
+      "mean_attempts": 1.5454545454545454,
+      "p90_attempts": 2,
+      "mean_prompt_tokens": 8885.6,
+      "mean_completion_tokens": 524.8571428571429,
+      "mean_usd": 0,
+      "total_usd": 0,
+      "guard_catch_rate": 0.05714285714285714,
+      "mean_similarity": 0.7407691004825724,
+      "failure_classes": {
+        "exec_error": 13
+      },
+      "per_dialect": {
+        "oracle": {
+          "cases": 17,
+          "passed": 6,
+          "pass_rate": 0.35294117647058826,
+          "mean_attempts": 2
+        },
+        "tsql": {
+          "cases": 18,
+          "passed": 16,
+          "pass_rate": 0.8888888888888888,
+          "mean_attempts": 1.375
+        }
+      },
+      "per_tag": {
+        "cte": {
+          "cases": 3,
+          "passed": 3,
+          "pass_rate": 1,
+          "mean_attempts": 2
+        },
+        "date_fn": {
+          "cases": 7,
+          "passed": 3,
+          "pass_rate": 0.42857142857142855,
+          "mean_attempts": 2
+        },
+        "implicit_cast": {
+          "cases": 3,
+          "passed": 3,
+          "pass_rate": 1,
+          "mean_attempts": 1.6666666666666667
+        },
+        "join": {
+          "cases": 8,
+          "passed": 6,
+          "pass_rate": 0.75,
+          "mean_attempts": 1.1666666666666667
+        },
+        "null_fn": {
+          "cases": 4,
+          "passed": 1,
+          "pass_rate": 0.25,
+          "mean_attempts": 1
+        },
+        "rownum": {
+          "cases": 3,
+          "passed": 1,
+          "pass_rate": 0.3333333333333333,
+          "mean_attempts": 2
+        },
+        "string_fn": {
+          "cases": 4,
+          "passed": 2,
+          "pass_rate": 0.5,
+          "mean_attempts": 1.5
+        },
+        "top_n": {
+          "cases": 3,
+          "passed": 2,
+          "pass_rate": 0.6666666666666666,
+          "mean_attempts": 1
+        },
+        "window": {
+          "cases": 6,
+          "passed": 5,
+          "pass_rate": 0.8333333333333334,
+          "mean_attempts": 2
+        }
+      },
+      "per_difficulty": {
+        "easy": {
+          "cases": 11,
+          "passed": 5,
+          "pass_rate": 0.45454545454545453,
+          "mean_attempts": 1.4
+        },
+        "hard": {
+          "cases": 11,
+          "passed": 8,
+          "pass_rate": 0.7272727272727273,
+          "mean_attempts": 1.75
+        },
+        "medium": {
+          "cases": 13,
+          "passed": 9,
+          "pass_rate": 0.6923076923076923,
+          "mean_attempts": 1.4444444444444444
+        }
+      }
+    },
+    "baseline": {
+      "cases": 35,
+      "passed": 14,
+      "pass_rate": 0.4,
+      "mean_attempts": 1,
+      "p90_attempts": 1,
+      "mean_prompt_tokens": 124.42857142857143,
+      "mean_completion_tokens": 58.857142857142854,
+      "mean_usd": 0,
+      "total_usd": 0,
+      "guard_catch_rate": 0,
+      "mean_similarity": 0.8314281518510122,
+      "failure_classes": {
+        "exec_error": 20,
+        "result_mismatch": 1
+      },
+      "per_dialect": {
+        "oracle": {
+          "cases": 17,
+          "passed": 5,
+          "pass_rate": 0.29411764705882354,
+          "mean_attempts": 1
+        },
+        "tsql": {
+          "cases": 18,
+          "passed": 9,
+          "pass_rate": 0.5,
+          "mean_attempts": 1
+        }
+      },
+      "per_tag": {
+        "cte": {
+          "cases": 3,
+          "passed": 1,
+          "pass_rate": 0.3333333333333333,
+          "mean_attempts": 1
+        },
+        "date_fn": {
+          "cases": 7,
+          "passed": 1,
+          "pass_rate": 0.14285714285714285,
+          "mean_attempts": 1
+        },
+        "implicit_cast": {
+          "cases": 3,
+          "passed": 1,
+          "pass_rate": 0.3333333333333333,
+          "mean_attempts": 1
+        },
+        "join": {
+          "cases": 8,
+          "passed": 4,
+          "pass_rate": 0.5,
+          "mean_attempts": 1
+        },
+        "null_fn": {
+          "cases": 4,
+          "passed": 0,
+          "pass_rate": 0,
+          "mean_attempts": 0
+        },
+        "rownum": {
+          "cases": 3,
+          "passed": 3,
+          "pass_rate": 1,
+          "mean_attempts": 1
+        },
+        "string_fn": {
+          "cases": 4,
+          "passed": 1,
+          "pass_rate": 0.25,
+          "mean_attempts": 1
+        },
+        "top_n": {
+          "cases": 3,
+          "passed": 3,
+          "pass_rate": 1,
+          "mean_attempts": 1
+        },
+        "window": {
+          "cases": 6,
+          "passed": 4,
+          "pass_rate": 0.6666666666666666,
+          "mean_attempts": 1
+        }
+      },
+      "per_difficulty": {
+        "easy": {
+          "cases": 11,
+          "passed": 4,
+          "pass_rate": 0.36363636363636365,
+          "mean_attempts": 1
+        },
+        "hard": {
+          "cases": 11,
+          "passed": 5,
+          "pass_rate": 0.45454545454545453,
+          "mean_attempts": 1
+        },
+        "medium": {
+          "cases": 13,
+          "passed": 5,
+          "pass_rate": 0.38461538461538464,
+          "mean_attempts": 1
+        }
+      }
+    }
+  }
+}
