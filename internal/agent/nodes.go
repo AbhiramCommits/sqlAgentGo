@@ -162,40 +162,36 @@ func (r *run) actNode(ctx context.Context, st *State) (string, error) {
 // guardNode runs the groundedness guard. Any violation means the candidate
 // is not executed; the run routes straight to repairNode with the violation
 // and its suggestion as feedback. This is the cheap failure path.
-func (r *run) guardNode(ctx context.Context, st *State) (string, error) {
+func (r *run) guardNode(_ context.Context, st *State) (string, error) {
 	st.Status = StatusVerifying
 	start := time.Now()
 	step := Step{Node: NodeGuard, Status: st.Status, Attempt: st.Attempt}
 
 	viols, err := guard.CheckGrounded(st.Candidate, &st.Schema)
 	step.Violations = len(viols)
+	if err == nil && len(viols) == 0 {
+		step.Detail = "candidate is grounded in the schema"
+		step.LatencyMs = time.Since(start).Milliseconds()
+		r.record(step)
+		return NodeVerify, nil
+	}
+
 	if err != nil {
 		r.failure = "guard could not parse candidate SQL: " + err.Error()
 		st.FailureClass = FailureExecError
-		step.FailureClass = st.FailureClass
-		step.Detail = r.failure
-		step.LatencyMs = time.Since(start).Milliseconds()
-		r.record(step)
-		return NodeRepair, nil
-	}
-	if len(viols) > 0 {
+	} else {
 		msgs := make([]string, len(viols))
 		for i, v := range viols {
 			msgs[i] = v.String()
 		}
 		r.failure = strings.Join(msgs, "; ")
 		st.FailureClass = FailureGuardViolation
-		step.FailureClass = st.FailureClass
-		step.Detail = r.failure
-		step.LatencyMs = time.Since(start).Milliseconds()
-		r.record(step)
-		return NodeRepair, nil
 	}
-
-	step.Detail = "candidate is grounded in the schema"
+	step.FailureClass = st.FailureClass
+	step.Detail = r.failure
 	step.LatencyMs = time.Since(start).Milliseconds()
 	r.record(step)
-	return NodeVerify, nil
+	return NodeRepair, nil
 }
 
 // --- verifyNode --------------------------------------------------------------
@@ -208,52 +204,39 @@ func (r *run) verifyNode(ctx context.Context, st *State) (string, error) {
 	start := time.Now()
 	step := Step{Node: NodeVerify, Status: st.Status, Attempt: st.Attempt}
 
-	if r.a.source == nil || r.a.target == nil {
-		r.failure = "verification requires source and target executors"
-		st.FailureClass = FailureExecError
-		step.FailureClass = st.FailureClass
-		step.Detail = r.failure
-		step.LatencyMs = time.Since(start).Milliseconds()
-		r.record(step)
-		return NodeRepair, nil
+	var failMsg, failClass string
+	switch {
+	case r.a.source == nil || r.a.target == nil:
+		failMsg, failClass = "verification requires source and target executors", FailureExecError
+	default:
+		srcRes, err := r.a.source.Run(ctx, st.SourceSQL)
+		if err != nil {
+			failMsg, failClass = "source engine error: "+err.Error(), FailureExecError
+			break
+		}
+		tgtRes, err := r.a.target.Run(ctx, st.Candidate)
+		if err != nil {
+			failMsg, failClass = "target engine error: "+err.Error(), FailureExecError
+			break
+		}
+		report := exec.Diff(srcRes, tgtRes)
+		step.Detail = report.String()
+		if report.Equal {
+			st.Status = StatusGreen
+			st.FailureClass = ""
+			step.Status = st.Status
+			step.LatencyMs = time.Since(start).Milliseconds()
+			r.record(step)
+			return "", nil
+		}
+		failMsg, failClass = diffFailure(report), FailureResultMismatch
 	}
 
-	srcRes, err := r.a.source.Run(ctx, st.SourceSQL)
-	if err != nil {
-		r.failure = "source engine error: " + err.Error()
-		st.FailureClass = FailureExecError
-		step.FailureClass = st.FailureClass
-		step.Detail = r.failure
-		step.LatencyMs = time.Since(start).Milliseconds()
-		r.record(step)
-		return NodeRepair, nil
-	}
-	tgtRes, err := r.a.target.Run(ctx, st.Candidate)
-	if err != nil {
-		r.failure = "target engine error: " + err.Error()
-		st.FailureClass = FailureExecError
-		step.FailureClass = st.FailureClass
-		step.Detail = r.failure
-		step.LatencyMs = time.Since(start).Milliseconds()
-		r.record(step)
-		return NodeRepair, nil
-	}
-
-	report := exec.Diff(srcRes, tgtRes)
-	step.Detail = report.String()
+	r.failure = failMsg
+	st.FailureClass = failClass
+	step.FailureClass = failClass
+	step.Detail = failMsg
 	step.LatencyMs = time.Since(start).Milliseconds()
-
-	if report.Equal {
-		st.Status = StatusGreen
-		st.FailureClass = ""
-		step.Status = st.Status
-		r.record(step)
-		return "", nil
-	}
-
-	r.failure = diffFailure(report)
-	st.FailureClass = FailureResultMismatch
-	step.FailureClass = st.FailureClass
 	r.record(step)
 	return NodeRepair, nil
 }
@@ -276,7 +259,7 @@ func diffFailure(report exec.DiffReport) string {
 // repairNode either gives up (Attempt >= MaxAttempts -> exhausted) or builds
 // a repair message holding the previous candidate and the exact failure,
 // increments Attempt, and routes back to actNode.
-func (r *run) repairNode(ctx context.Context, st *State) (string, error) {
+func (r *run) repairNode(_ context.Context, st *State) (string, error) {
 	if st.Attempt >= st.MaxAttempts {
 		st.Status = StatusExhausted
 		if st.FailureClass == "" {

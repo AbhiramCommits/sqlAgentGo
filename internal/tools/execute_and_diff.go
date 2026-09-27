@@ -16,12 +16,15 @@ type ExecuteAndDiff struct {
 	Target exec.Executor
 }
 
+// Name implements Tool.
 func (d *ExecuteAndDiff) Name() string { return "execute_and_diff" }
 
+// Description implements Tool.
 func (d *ExecuteAndDiff) Description() string {
 	return "Run source SQL on the source engine and target SQL on the target engine, then diff the two result sets."
 }
 
+// JSONSchema implements Tool.
 func (d *ExecuteAndDiff) JSONSchema() json.RawMessage {
 	return json.RawMessage(`{
   "type": "object",
@@ -39,6 +42,7 @@ func (d *ExecuteAndDiff) JSONSchema() json.RawMessage {
 }`)
 }
 
+// Invoke implements Tool.
 func (d *ExecuteAndDiff) Invoke(ctx context.Context, args json.RawMessage) (string, error) {
 	if d.Source == nil || d.Target == nil {
 		return "", fmt.Errorf("execute_and_diff requires both source and target executors")

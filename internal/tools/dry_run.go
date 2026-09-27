@@ -15,12 +15,15 @@ type DryRun struct {
 	Target exec.Executor
 }
 
+// Name implements Tool.
 func (d *DryRun) Name() string { return "dry_run" }
 
+// Description implements Tool.
 func (d *DryRun) Description() string {
 	return "EXPLAIN a candidate SELECT against the target engine; returns parse/plan errors verbatim without executing anything."
 }
 
+// JSONSchema implements Tool.
 func (d *DryRun) JSONSchema() json.RawMessage {
 	return json.RawMessage(`{
   "type": "object",
@@ -34,6 +37,7 @@ func (d *DryRun) JSONSchema() json.RawMessage {
 }`)
 }
 
+// Invoke implements Tool.
 func (d *DryRun) Invoke(ctx context.Context, args json.RawMessage) (string, error) {
 	if d.Target == nil {
 		return "", fmt.Errorf("dry_run has no target executor")

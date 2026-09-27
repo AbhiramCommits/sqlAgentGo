@@ -30,13 +30,13 @@ func newToolsListCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List registered tools",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			reg, err := buildToolRegistry(cmd.Context())
 			if err != nil {
 				return err
 			}
 			for _, t := range reg.All() {
-				fmt.Fprintf(cmd.OutOrStdout(), "%-16s %s\n", t.Name(), t.Description())
+				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%-16s %s\n", t.Name(), t.Description())
 			}
 			return nil
 		},
@@ -61,7 +61,7 @@ func newToolsInvokeCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), out)
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), out)
 			return nil
 		},
 	}

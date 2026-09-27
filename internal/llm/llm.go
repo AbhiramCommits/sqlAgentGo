@@ -183,7 +183,7 @@ func (c *Client) do(ctx context.Context, messages []Message, tools []ToolDef) (*
 	if err != nil {
 		return nil, 0, fmt.Errorf("llm request: %w", err)
 	}
-	defer httpResp.Body.Close()
+	defer func() { _ = httpResp.Body.Close() }()
 
 	data, err := io.ReadAll(io.LimitReader(httpResp.Body, 4<<20))
 	if err != nil {

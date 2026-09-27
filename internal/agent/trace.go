@@ -28,7 +28,7 @@ func writeTrace(path string, steps []Step) error {
 	if err != nil {
 		return fmt.Errorf("create trace file: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	bw := bufio.NewWriter(f)
 	enc := json.NewEncoder(bw)

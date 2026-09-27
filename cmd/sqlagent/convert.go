@@ -28,7 +28,7 @@ func newConvertCmd() *cobra.Command {
 (plan -> act with tools -> guard -> verify, repairing up to --max-attempts),
 and prints the final Snowflake SQL. Exits non-zero when the run is exhausted.`,
 		Args: cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			query, err := readQuery(file, cmd.InOrStdin())
 			if err != nil {
 				return err
@@ -67,8 +67,8 @@ and prints the final Snowflake SQL. Exits non-zero when the run is exhausted.`,
 				return err
 			}
 
-			fmt.Fprintln(cmd.OutOrStdout(), st.Candidate)
-			fmt.Fprintf(cmd.ErrOrStderr(), "attempts=%d status=%s trace=%s\n", st.Attempt, st.Status, res.TracePath)
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), st.Candidate)
+			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "attempts=%d status=%s trace=%s\n", st.Attempt, st.Status, res.TracePath)
 			if st.Status == agent.StatusExhausted {
 				return fmt.Errorf("conversion exhausted after %d attempts (trace: %s)", st.Attempt, res.TracePath)
 			}

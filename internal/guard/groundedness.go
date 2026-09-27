@@ -32,9 +32,12 @@ import (
 // ViolationKind classifies an ungrounded identifier.
 type ViolationKind string
 
+// The kinds of groundedness violations.
 const (
 	KindTable  ViolationKind = "table"
 	KindColumn ViolationKind = "column"
+	// KindParse marks SQL the parser could not parse at all.
+	KindParse ViolationKind = "parse"
 )
 
 // GroundednessViolation describes one identifier in the SQL that is absent
@@ -109,6 +112,21 @@ func CheckGrounded(sql string, sch *schema.Schema) ([]GroundednessViolation, err
 		}
 	}
 	return c.viols, nil
+}
+
+// CheckClosed is CheckGrounded with fail-closed semantics: a parse error is
+// converted into a KindParse violation instead of an error return, so
+// unparseable SQL is never silently accepted as grounded.
+func CheckClosed(sql string, sch *schema.Schema) []GroundednessViolation {
+	viols, err := CheckGrounded(sql, sch)
+	if err != nil {
+		return []GroundednessViolation{{
+			Kind:       KindParse,
+			Identifier: strings.TrimSpace(sql),
+			Suggestion: err.Error(),
+		}}
+	}
+	return viols
 }
 
 // --- traversal ---------------------------------------------------------

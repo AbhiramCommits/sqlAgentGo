@@ -1,0 +1,24 @@
+run:
+  timeout: 5m
+  build-tags:
+    - integration
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - ineffassign
+    - misspell
+    - revive
+    - unconvert
+    - unparam
+    - bodyclose
+    - nilerr
+    - gocritic
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0

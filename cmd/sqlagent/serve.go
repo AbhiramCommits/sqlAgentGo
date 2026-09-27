@@ -16,7 +16,7 @@ func newServeCmd() *cobra.Command {
 		Use:   "serve",
 		Short: "Run the sqlagent HTTP server",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			cfg, err := config.Load("configs", ".")
 			if err != nil {
 				return err
@@ -27,7 +27,7 @@ func newServeCmd() *cobra.Command {
 			}
 
 			mux := http.NewServeMux()
-			mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 				writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 			})
 			mux.HandleFunc("POST /convert", func(w http.ResponseWriter, r *http.Request) {

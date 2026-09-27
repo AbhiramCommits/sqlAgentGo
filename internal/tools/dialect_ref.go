@@ -43,12 +43,15 @@ func NewDialectRef() (*DialectRef, error) {
 	return &DialectRef{entries: doc.Constructs}, nil
 }
 
+// Name implements Tool.
 func (d *DialectRef) Name() string { return "dialect_ref" }
 
+// Description implements Tool.
 func (d *DialectRef) Description() string {
 	return "Look up how a specific SQL construct in a source dialect (tsql or oracle) translates to Snowflake."
 }
 
+// JSONSchema implements Tool.
 func (d *DialectRef) JSONSchema() json.RawMessage {
 	return json.RawMessage(`{
   "type": "object",
@@ -67,7 +70,8 @@ func (d *DialectRef) JSONSchema() json.RawMessage {
 }`)
 }
 
-func (d *DialectRef) Invoke(ctx context.Context, args json.RawMessage) (string, error) {
+// Invoke implements Tool.
+func (d *DialectRef) Invoke(_ context.Context, args json.RawMessage) (string, error) {
 	var req struct {
 		Construct     string `json:"construct"`
 		SourceDialect string `json:"source_dialect"`

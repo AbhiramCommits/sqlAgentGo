@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config holds the merged sqlagent configuration.
 type Config struct {
 	LLM     LLM            `mapstructure:"llm"`
 	Pricing []PricingEntry `mapstructure:"pricing"`
@@ -49,6 +50,7 @@ func (p ModelPrice) CostUSD(promptTokens, completionTokens int) float64 {
 		float64(completionTokens)/1e6*p.CompletionUSDPer1M
 }
 
+// LLM holds the chat-completions endpoint settings.
 type LLM struct {
 	BaseURL     string  `mapstructure:"base_url"`
 	Model       string  `mapstructure:"model"`

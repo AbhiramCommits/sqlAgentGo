@@ -36,7 +36,7 @@ func TestSmokeSeedAndDiff(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer dk.Close()
+	defer func() { _ = dk.Close() }()
 	if err := dk.LoadSQL(readSeedFile(t, "seed_duckdb.sql")); err != nil {
 		t.Fatalf("duckdb seed failed: %v", err)
 	}

@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ["1.22.x", "1.23.x"]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sqlagent
+          POSTGRES_PASSWORD: sqlagent
+          POSTGRES_DB: tpch
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd "pg_isready -U sqlagent -d tpch"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Seed postgres (and validate the duckdb shim)
+        run: go run ./cmd/sqlagent seed
+      - name: Vet
+        run: go vet ./...
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64.8
+      - name: Test
+        run: go test ./...
+      - name: Coverage
+        run: |
+          go test ./internal/... -coverprofile=coverage.out
+          go run scripts/check_coverage.go coverage.out 75

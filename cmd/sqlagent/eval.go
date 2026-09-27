@@ -42,7 +42,7 @@ scoreboard to stdout and full results to results.json.
 --compare runs both the agentic loop and the baseline on the identical
 corpus and reports them side by side.`,
 		Args: cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := cmd.Context()
 
 			c, err := corpus.LoadDir(corpusDir)
@@ -123,13 +123,13 @@ corpus and reports them side by side.`,
 			}
 
 			if compare {
-				fmt.Fprintln(cmd.OutOrStdout(), harness.TextCompare(scoreboards[modeAgent], scoreboards[modeBaseline]))
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), harness.TextCompare(scoreboards[modeAgent], scoreboards[modeBaseline]))
 			} else {
 				for _, mode := range modes {
-					fmt.Fprintln(cmd.OutOrStdout(), harness.TextScoreboard(mode, scoreboards[mode]))
+					_, _ = fmt.Fprintln(cmd.OutOrStdout(), harness.TextScoreboard(mode, scoreboards[mode]))
 				}
 			}
-			fmt.Fprintf(cmd.ErrOrStderr(), "wrote %s (%d cases, %s)\n", out, len(c.Cases), modesString(modes))
+			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "wrote %s (%d cases, %s)\n", out, len(c.Cases), modesString(modes))
 			return nil
 		},
 	}

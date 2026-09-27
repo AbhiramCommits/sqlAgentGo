@@ -94,7 +94,7 @@ func TestChatRequestShapeAndUsage(t *testing.T) {
 
 func TestRetryOn429ThenSuccess(t *testing.T) {
 	var calls atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		if calls.Add(1) == 1 {
 			w.WriteHeader(http.StatusTooManyRequests)
 			_, _ = w.Write([]byte(`{"error":{"message":"rate limited"}}`))
@@ -119,7 +119,7 @@ func TestRetryOn429ThenSuccess(t *testing.T) {
 
 func TestRetryOn5xxThenSuccess(t *testing.T) {
 	var calls atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		n := calls.Add(1)
 		if n <= 2 {
 			w.WriteHeader(int(500 + n))
@@ -141,7 +141,7 @@ func TestRetryOn5xxThenSuccess(t *testing.T) {
 
 func TestRetriesExhausted(t *testing.T) {
 	var calls atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		calls.Add(1)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(`{"error":{"message":"server exploded"}}`))
@@ -159,7 +159,7 @@ func TestRetriesExhausted(t *testing.T) {
 
 func TestNonRetryableErrorIsImmediate(t *testing.T) {
 	var calls atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		calls.Add(1)
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte(`{"error":{"message":"bad request"}}`))
@@ -175,7 +175,7 @@ func TestNonRetryableErrorIsImmediate(t *testing.T) {
 }
 
 func TestToolCallsParsed(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{
   "choices":[{"message":{"role":"assistant","content":null,"tool_calls":[
@@ -204,7 +204,7 @@ func TestToolCallsParsed(t *testing.T) {
 
 func TestContextCancellationDuringBackoff(t *testing.T) {
 	var calls atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		calls.Add(1)
 		w.WriteHeader(http.StatusTooManyRequests)
 		_, _ = w.Write([]byte("slow down"))

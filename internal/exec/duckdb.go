@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	_ "github.com/marcboeker/go-duckdb"
+	_ "github.com/marcboeker/go-duckdb" // registers the duckdb database/sql driver
 )
 
 // duckdbColumnName maps DuckDB's expression-derived column names
@@ -45,7 +45,7 @@ func NewDuckDBExecutor(path string) (*DuckDBExecutor, error) {
 	// database instance.
 	db.SetMaxOpenConns(1)
 	if err := db.Ping(); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("ping duckdb: %w", err)
 	}
 	return &DuckDBExecutor{db: db}, nil
@@ -77,7 +77,7 @@ func (d *DuckDBExecutor) Run(ctx context.Context, sql string) (ResultSet, error)
 	if err != nil {
 		return ResultSet{}, fmt.Errorf("duckdb query: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	cols, err := rows.Columns()
 	if err != nil {

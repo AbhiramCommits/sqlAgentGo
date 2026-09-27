@@ -125,12 +125,13 @@ type fakeRequest struct {
 }
 
 // fakeLLM is a scripted responder: requests without tools get the plan
-// response; requests with tools consume actResponses in order (repeating the
-// last one when the script runs out).
+// response (or noToolsResp when set); requests with tools consume
+// actResponses in order (repeating the last one when the script runs out).
 type fakeLLM struct {
 	mu           sync.Mutex
 	requests     []fakeRequest
 	actResponses []fakeResp
+	noToolsResp  *fakeResp
 	planCalls    int
 	actCalls     int
 }
@@ -149,28 +150,16 @@ func (f *fakeLLM) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		f.actCalls++
 	}
 	script := f.actResponses
+	noTools := f.noToolsResp
 	f.mu.Unlock()
 
 	w.Header().Set("Content-Type", "application/json")
 	if len(req.Tools) == 0 {
-		_ = json.NewEncoder(w).Encode(fakeResp{
-			Choices: []struct {
-				Message struct {
-					Role      string         `json:"role"`
-					Content   string         `json:"content"`
-					ToolCalls []fakeToolCall `json:"tool_calls,omitempty"`
-				} `json:"message"`
-				FinishReason string `json:"finish_reason"`
-			}{{Message: struct {
-				Role      string         `json:"role"`
-				Content   string         `json:"content"`
-				ToolCalls []fakeToolCall `json:"tool_calls,omitempty"`
-			}{Role: "assistant", Content: `{"constructs_to_translate":["TOP"],"tables_needed":["orders"]}`}, FinishReason: "stop"}},
-			Usage: struct {
-				PromptTokens     int `json:"prompt_tokens"`
-				CompletionTokens int `json:"completion_tokens"`
-			}{PromptTokens: 100, CompletionTokens: 20},
-		})
+		resp := planFakeResp
+		if noTools != nil {
+			resp = *noTools
+		}
+		_ = json.NewEncoder(w).Encode(resp)
 		return
 	}
 	var resp fakeResp
@@ -204,6 +193,14 @@ func sqlResp(sql string) fakeResp {
 	r.Usage.CompletionTokens = 10
 	return r
 }
+
+// planFakeResp is the scripted answer for the agent's tool-less plan call.
+var planFakeResp = func() fakeResp {
+	r := sqlResp(`{"constructs_to_translate":["TOP"],"tables_needed":["orders"]}`)
+	r.Usage.PromptTokens = 100
+	r.Usage.CompletionTokens = 20
+	return r
+}()
 
 func toolCallResp(name, args string) fakeResp {
 	r := fakeResp{}
@@ -254,7 +251,7 @@ func readTraceSteps(t *testing.T, path string) []Step {
 	if err != nil {
 		t.Fatalf("open trace: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	var steps []Step
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {

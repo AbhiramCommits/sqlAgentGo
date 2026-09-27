@@ -2,6 +2,8 @@ package harness
 
 import (
 	"testing"
+
+	"sqlagent/internal/config"
 )
 
 func green(id, dialect, tag, diff string, attempts, guardViol int, prompt, completion int) CaseResult {
@@ -129,4 +131,9 @@ func contains(s, sub string) bool {
 		}
 	}
 	return false
+}
+
+// ModelPriceForTest mirrors config.ModelPrice for render_test.go use.
+func ModelPriceForTest() config.ModelPrice {
+	return config.ModelPrice{PromptUSDPer1M: 2.5, CompletionUSDPer1M: 10}
 }

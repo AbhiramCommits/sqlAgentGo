@@ -1,0 +1,2 @@
+schema mismatch: left cols [a b] != right cols [a]
+row 0: b: i:2 != NULL

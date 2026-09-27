@@ -15,12 +15,15 @@ type SchemaLookup struct {
 	Schema *schema.Schema
 }
 
+// Name implements Tool.
 func (s *SchemaLookup) Name() string { return "schema_lookup" }
 
+// Description implements Tool.
 func (s *SchemaLookup) Description() string {
 	return "List schema tables, or inspect the columns and types of one table."
 }
 
+// JSONSchema implements Tool.
 func (s *SchemaLookup) JSONSchema() json.RawMessage {
 	return json.RawMessage(`{
   "type": "object",
@@ -33,7 +36,8 @@ func (s *SchemaLookup) JSONSchema() json.RawMessage {
 }`)
 }
 
-func (s *SchemaLookup) Invoke(ctx context.Context, args json.RawMessage) (string, error) {
+// Invoke implements Tool.
+func (s *SchemaLookup) Invoke(_ context.Context, args json.RawMessage) (string, error) {
 	if s.Schema == nil {
 		return "", fmt.Errorf("schema_lookup has no schema loaded")
 	}
