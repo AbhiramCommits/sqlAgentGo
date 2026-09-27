@@ -1,0 +1,14 @@
+.git
+.github
+traces
+results.json
+report.md
+badges
+docs
+*.duckdb
+*.duckdb.wal
+.DS_Store
+docker-compose.yml
+deploy
+Dockerfile
+.dockerignore

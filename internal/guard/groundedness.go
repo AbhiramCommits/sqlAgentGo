@@ -26,6 +26,7 @@ import (
 	"github.com/auxten/postgresql-parser/pkg/sql/parser"
 	"github.com/auxten/postgresql-parser/pkg/sql/sem/tree"
 
+	"sqlagent/internal/metrics"
 	"sqlagent/internal/schema"
 )
 
@@ -597,6 +598,7 @@ func (c *collector) violate(v GroundednessViolation) {
 	}
 	c.seen[key] = true
 	c.viols = append(c.viols, v)
+	metrics.GuardViolationsTotal.WithLabelValues(string(v.Kind)).Inc()
 }
 
 func (c *collector) nearestTable(name string) string {

@@ -91,6 +91,50 @@ tool-hungry constructs like CTEs and implicit casts — while it loses only on `
 where this weak model already passes trivially. A 3B model's repair replies are noisy; the
 headline number is the measurement harness working as intended, not a claim about frontier models.
 
+## Verification targets
+
+Pass/fail comes only from the differential execution oracle, and the oracle has two target engines:
+
+- **DuckDB (default, zero-credential)** — an embedded instance seeded from `db/seed_duckdb.sql`.
+  This is what local dev, tests, and the committed evaluation use; no account needed.
+- **Snowflake (fidelity path)** — `internal/exec/snowflake.go`, behind `//go:build snowflake`
+  (gosnowflake). When the binary is built with `-tags snowflake` and `SNOWFLAKE_ACCOUNT` is set,
+  `sqlagent eval` and `sqlagent serve` substitute Snowflake as the verification target instead of
+  DuckDB. Provision the target with `db/seed_snowflake.sql` (same deterministic fixtures), then:
+
+  ```sh
+  go build -tags snowflake ./...
+  SNOWFLAKE_ACCOUNT=xy12345 SNOWFLAKE_USER=... SNOWFLAKE_PASSWORD=... \
+    go run -tags snowflake ./cmd/sqlagent eval --corpus testdata/corpus
+  ```
+
+  DuckDB is fast, free, and identical to the Postgres fixtures; Snowflake is the only place the
+  candidate actually runs on its intended engine, so it is the higher-fidelity check.
+
+## Serving and operations
+
+```sh
+docker compose --profile full up   # server + postgres + prometheus + grafana
+curl -s localhost:8080/healthz
+curl -s -X POST localhost:8080/v1/convert -H 'Content-Type: application/json' \
+  -d '{"source_sql":"SELECT o_orderkey FROM orders ORDER BY o_totalprice DESC LIMIT 10","source_dialect":"tsql"}'
+curl -s localhost:8080/v1/traces/<trace_id>   # JSONL trace (returned in the response)
+curl -s localhost:8080/metrics                # Prometheus metrics
+# Grafana: http://localhost:3000 (anonymous admin) -> "sqlagent conversions" dashboard
+```
+
+The server logs one structured JSON line per request (`trace_id` included), honors request
+cancellation and a per-request timeout (`--timeout`, default 5m), and exposes
+`conversion_attempts`, `conversions_total{status}`, `guard_violations_total{kind}`,
+`llm_tokens_total{type}`, and `llm_request_duration_seconds` (Prometheus at :9090 scrapes it).
+
+Container images (multi-stage `Dockerfile`):
+
+- `sqlagent` (default): full server with the embedded DuckDB target, on distroless/cc.
+  DuckDB is statically linked, so the image is ~120MB — the engine is the size.
+- `sqlagent-minimal`: static, CGO-free, no DuckDB, on distroless/static, **15MB**. Pair it with
+  the Snowflake target (`--build-arg TAGS=snowflake`).
+
 ## Quickstart
 
 ```sh

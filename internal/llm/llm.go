@@ -16,6 +16,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"sqlagent/internal/metrics"
 )
 
 // Config configures a Client.
@@ -138,10 +140,17 @@ type chatResponse struct {
 // 429 and 5xx responses are retried with exponential backoff up to
 // MaxRetries; other errors are returned immediately.
 func (c *Client) Chat(ctx context.Context, messages []Message, tools []ToolDef) (*Response, error) {
+	start := time.Now()
+	defer func() {
+		metrics.LLMRequestDuration.Observe(time.Since(start).Seconds())
+	}()
+
 	delay := c.cfg.RetryBaseDelay
 	for attempt := 0; ; attempt++ {
 		resp, status, err := c.do(ctx, messages, tools)
 		if err == nil {
+			metrics.LLMTokensTotal.WithLabelValues("prompt").Add(float64(resp.Usage.PromptTokens))
+			metrics.LLMTokensTotal.WithLabelValues("completion").Add(float64(resp.Usage.CompletionTokens))
 			return resp, nil
 		}
 		// status 0 means the failure was not an HTTP status response

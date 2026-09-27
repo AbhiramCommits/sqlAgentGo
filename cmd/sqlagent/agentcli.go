@@ -29,52 +29,71 @@ func buildLLMClient(cfg *config.Config, model string) *llm.Client {
 	})
 }
 
-// buildPipeline wires the shared pieces of the evaluation harness: the
-// introspected schema, the Postgres source executor, the seeded DuckDB
-// target executor, and the tool registry.
-func buildPipeline(ctx context.Context) (*schema.Schema, *exec.PostgresExecutor, *exec.DuckDBExecutor, *tools.Registry, error) {
-	sch, err := schema.Load(ctx, defaultDSN(), "public")
-	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("schema introspection (is `make up` running?): %w", err)
-	}
-	pg, err := exec.NewPostgresExecutor(defaultDSN())
-	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("postgres executor: %w", err)
-	}
+// buildDuckDBTarget constructs the zero-credential verification target: an
+// embedded DuckDB instance seeded from db/seed_duckdb.sql. It returns nil
+// when the driver is not compiled in (noduckdb builds) or the seed is
+// missing.
+func buildDuckDBTarget() exec.Executor {
 	dk, err := exec.NewDuckDBExecutor("")
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("duckdb executor: %w", err)
+		return nil
 	}
 	script, err := os.ReadFile("db/seed_duckdb.sql")
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("read db/seed_duckdb.sql: %w", err)
+		_ = dk.Close()
+		return nil
 	}
 	if err := dk.LoadSQL(string(script)); err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("seed duckdb: %w", err)
+		_ = dk.Close()
+		return nil
+	}
+	return dk
+}
+
+// buildPipeline wires the shared pieces of the evaluation pipeline: the
+// introspected schema, the Postgres source executor, the verification target
+// (DuckDB by default, Snowflake in -tags snowflake builds), and the tool
+// registry.
+func buildPipeline(ctx context.Context, target exec.Executor) (*schema.Schema, *exec.PostgresExecutor, *tools.Registry, error) {
+	sch, err := schema.Load(ctx, defaultDSN(), "public")
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("schema introspection (is `make up` running?): %w", err)
+	}
+	pg, err := exec.NewPostgresExecutor(defaultDSN())
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("postgres executor: %w", err)
 	}
 
 	dialectRef, err := tools.NewDialectRef()
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
+	}
+	dryRunTarget := target
+	if dryRunTarget == nil {
+		dryRunTarget = pg
 	}
 	reg := tools.NewRegistry(
 		&tools.SchemaLookup{Schema: sch},
 		dialectRef,
-		&tools.DryRun{Target: dk},
-		&tools.ExecuteAndDiff{Source: pg, Target: dk},
+		&tools.DryRun{Target: dryRunTarget},
+		&tools.ExecuteAndDiff{Source: pg, Target: target},
 	)
-	return sch, pg, dk, reg, nil
+	return sch, pg, reg, nil
 }
 
 // buildAgent wires the full translation pipeline for the convert/serve
-// commands.
+// commands, using DuckDB as the verification target.
 func buildAgent(ctx context.Context, cfg *config.Config, caseID string, maxAttempts int) (*agent.Agent, *schema.Schema, error) {
-	sch, pg, dk, reg, err := buildPipeline(ctx)
+	target := buildDuckDBTarget()
+	if target == nil {
+		return nil, nil, fmt.Errorf("no verification target available: duckdb driver unavailable (noduckdb build)")
+	}
+	sch, pg, reg, err := buildPipeline(ctx, target)
 	if err != nil {
 		return nil, nil, err
 	}
 	a := agent.New(buildLLMClient(cfg, ""), reg,
-		agent.WithExecutors(pg, dk),
+		agent.WithExecutors(pg, target),
 		agent.WithTraceDir("traces"),
 		agent.WithCaseID(caseID),
 		agent.WithMaxAttempts(maxAttempts),

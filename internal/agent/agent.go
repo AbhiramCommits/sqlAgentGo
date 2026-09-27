@@ -7,6 +7,7 @@ import (
 
 	"sqlagent/internal/exec"
 	"sqlagent/internal/llm"
+	"sqlagent/internal/metrics"
 	"sqlagent/internal/tools"
 )
 
@@ -75,10 +76,20 @@ func WithCaseID(id string) Option {
 // at traces/<case-id>/<timestamp>.jsonl (st.CaseID overrides the agent's
 // case id). On node failure a RunResult carrying the partial state and trace
 // path is returned alongside the error so harnesses can classify the run.
-func (a *Agent) Run(ctx context.Context, st *State) (*RunResult, error) {
+func (a *Agent) Run(ctx context.Context, st *State) (res *RunResult, err error) {
 	if st == nil {
 		return nil, fmt.Errorf("agent: nil state")
 	}
+	defer func() {
+		status := st.Status
+		if err != nil || status == "" || status == StatusPlanning || status == StatusActing {
+			status = "llm_error"
+		}
+		metrics.ConversionsTotal.WithLabelValues(status).Inc()
+		if err == nil {
+			metrics.ConversionAttempts.WithLabelValues(status).Observe(float64(st.Attempt))
+		}
+	}()
 	if a.llm == nil {
 		return nil, fmt.Errorf("agent: no LLM client configured")
 	}

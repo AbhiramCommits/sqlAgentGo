@@ -62,7 +62,22 @@ corpus and reports them side by side.`,
 				modelName = cfg.LLM.Model
 			}
 
-			sch, pg, dk, reg, err := buildPipeline(ctx)
+			// Verification target: DuckDB is the zero-credential default; when
+			// SNOWFLAKE_ACCOUNT is set (and the binary was built with
+			// -tags snowflake), Snowflake becomes the fidelity target.
+			target := buildDuckDBTarget()
+			if snowflakeAvailable() {
+				sf, err := newSnowflakeTarget(ctx)
+				if err != nil {
+					return err
+				}
+				target = sf
+			}
+			if target == nil {
+				return fmt.Errorf("no verification target available: duckdb unavailable and SNOWFLAKE_ACCOUNT unset")
+			}
+
+			sch, pg, reg, err := buildPipeline(ctx, target)
 			if err != nil {
 				return err
 			}
@@ -76,7 +91,7 @@ corpus and reports them side by side.`,
 			}
 
 			a := agent.New(buildLLMClient(cfg, modelName), reg,
-				agent.WithExecutors(pg, dk),
+				agent.WithExecutors(pg, target),
 				agent.WithTraceDir("traces"),
 				agent.WithMaxAttempts(maxAttempts),
 			)

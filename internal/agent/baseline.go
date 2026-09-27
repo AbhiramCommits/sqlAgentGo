@@ -7,16 +7,27 @@ import (
 
 	"sqlagent/internal/exec"
 	"sqlagent/internal/llm"
+	"sqlagent/internal/metrics"
 )
 
 // RunBaseline is the naive-prompting mode: a single LLM call with no tools,
 // no guard, and no repair loop. The candidate is still judged by the same
 // differential execution oracle as the agentic loop, so pass/fail stays
 // comparable across modes.
-func (a *Agent) RunBaseline(ctx context.Context, st *State) (*RunResult, error) {
+func (a *Agent) RunBaseline(ctx context.Context, st *State) (res *RunResult, err error) {
 	if st == nil {
 		return nil, fmt.Errorf("agent: nil state")
 	}
+	defer func() {
+		status := st.Status
+		if err != nil || status == "" || status == StatusPlanning || status == StatusActing || status == StatusVerifying {
+			status = "llm_error"
+		}
+		metrics.ConversionsTotal.WithLabelValues(status).Inc()
+		if err == nil {
+			metrics.ConversionAttempts.WithLabelValues(status).Observe(float64(st.Attempt))
+		}
+	}()
 	if a.llm == nil {
 		return nil, fmt.Errorf("agent: no LLM client configured")
 	}
